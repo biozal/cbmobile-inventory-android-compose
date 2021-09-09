@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Inventory</string>
+    <string name="title_activity_project">ProjectActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+</resources>
