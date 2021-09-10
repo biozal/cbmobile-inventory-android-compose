@@ -10,6 +10,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cbmobile.inventory.compose.InventoryApplication
@@ -49,7 +50,8 @@ class MainActivity : ComponentActivity() {
                         InventoryNavGraph(
                             appContainer = appContainer,
                             navController = navController,
-                            scaffoldState = scaffoldState
+                            scaffoldState = scaffoldState,
+                            lifecycleScope = lifecycleScope
                         )
                     }
                 }
@@ -63,9 +65,10 @@ fun InventoryAppBar() {
     InventoryTheme {
         TopAppBar(
             backgroundColor = Color(0xFFbd000e),
+            contentColor = Color.White,
             title = {
                 Row {
-                    Text("Inventory")
+                    Text(text = "Projects")
                 }
             },
         )

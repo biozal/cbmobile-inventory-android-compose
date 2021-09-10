@@ -15,6 +15,7 @@ class ProjectViewModel(private val projectId: String?, private val projectReposi
     private var _project: Project? = null
     val projectName: MutableLiveData<String> = MutableLiveData<String>()
     val projectDescription: MutableLiveData<String> = MutableLiveData<String>()
+
     val locations: MutableLiveData<List<Location>> by lazy {
         MutableLiveData<List<Location>>()
     }
@@ -42,9 +43,17 @@ class ProjectViewModel(private val projectId: String?, private val projectReposi
         projectDescription.value = newValue
     }
 
-    fun saveProject() {
-       if (_project != null) {
-       }
+    fun saveProject() : String {
+        var message = ""
+        if (_project != null && _project!!.name != "")  {
+            viewModelScope.launch {
+                val results = projectRepository.saveProject(_project!!)
+                message = if (results) "Project was saved" else "Error: Could not save project at this time"
+            }
+        } else {
+            message = "Error: project name must be set before saving"
+        }
+        return message
     }
 
 }

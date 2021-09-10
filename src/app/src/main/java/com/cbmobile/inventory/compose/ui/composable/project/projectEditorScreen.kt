@@ -6,12 +6,16 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.text.TextStyle
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.LifecycleCoroutineScope
 
 import com.cbmobile.inventory.compose.data.projects.*
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
+import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
@@ -19,7 +23,8 @@ fun ProjectEditorScreen(
     projectId: String?,
     projectRepository: ProjectRepository,
     navigateUp: () -> Unit,
-    scaffoldState: ScaffoldState = rememberScaffoldState()) {
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    lifecycleScope: LifecycleCoroutineScope) {
 
     val viewModel = ProjectViewModel(projectId, projectRepository)
 
@@ -29,13 +34,15 @@ fun ProjectEditorScreen(
             color = MaterialTheme.colors.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            ProjectEditor(viewModel)
+            ProjectEditor(viewModel, lifecycleScope)
         }
     }
 }
 
 @Composable
-fun ProjectEditor(viewModel: ProjectViewModel){
+fun ProjectEditor(viewModel: ProjectViewModel,
+                  lifecycleScope: LifecycleCoroutineScope){
+    val snackbarHostState = remember{SnackbarHostState()}
     val nameState = viewModel.projectName.observeAsState(initial = "")
     val descriptionState = viewModel.projectDescription.observeAsState(initial = "")
     Column(modifier = Modifier
@@ -59,20 +66,28 @@ fun ProjectEditor(viewModel: ProjectViewModel){
                 .padding(bottom = 10.dp)
         )
         Column(modifier =
-            Modifier.fillMaxWidth().fillMaxHeight(),
+        Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(modifier = Modifier.padding(top = 32.dp),
-                onClick = {
-
-                })
+            Button(modifier = Modifier.padding(top = 32.dp), onClick = {
+                val resultMessage = viewModel.saveProject()
+                    lifecycleScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = resultMessage,
+                            actionLabel = "",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                    })
             {
                 Text("Save", style = MaterialTheme.typography.h5)
             }
         }
-
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun ProjectEditorPreview() {
@@ -82,7 +97,8 @@ fun ProjectEditorPreview() {
             color = MaterialTheme.colors.background,
             modifier = Modifier.fillMaxSize()
        ) {
-            ProjectEditor(viewModel)
+            ProjectEditor(viewModel, null)
         }
     }
 }
+ */

@@ -7,7 +7,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectRepositoryMock : ProjectRepository {
 
-    override suspend fun saveProject(project: Project){
+    override suspend fun saveProject(project: Project) : Boolean {
         TODO("Not yet implemented")
     }
     override suspend fun getProject(projectId: String): Project {

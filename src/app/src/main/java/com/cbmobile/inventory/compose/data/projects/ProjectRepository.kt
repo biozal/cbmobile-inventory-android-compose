@@ -5,7 +5,7 @@ import com.cbmobile.inventory.compose.models.Project
 
 interface ProjectRepository {
 
-    suspend fun saveProject(project: Project)
+    suspend fun saveProject(project: Project) : Boolean
 
     suspend fun getProject(projectId: String): Project
 

@@ -42,16 +42,19 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         }
     }
 
-    override suspend fun saveProject(project: Project){
+    override suspend fun saveProject(project: Project) : Boolean {
+        var results = false;
         return withContext(Dispatchers.IO) {
            try{
                val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
                val json = Gson().toJson(project)
                val doc = MutableDocument(project.projectId, json)
                db?.save(doc)
+               results = true
            } catch (e: Exception){
                android.util.Log.e(e.message, e.stackTraceToString())
            }
+            return@withContext results
         }
     }
 

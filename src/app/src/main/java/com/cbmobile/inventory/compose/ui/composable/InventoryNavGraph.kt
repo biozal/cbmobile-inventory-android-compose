@@ -5,6 +5,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -38,6 +39,7 @@ fun InventoryNavGraph(
     appContainer: AppContainer,
     navController: NavHostController = rememberNavController(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
+    lifecycleScope: LifecycleCoroutineScope,
     startDestination: String = MainDestinations.HOME_ROUTE )
 {
 
@@ -59,7 +61,8 @@ fun InventoryNavGraph(
                 backstackEntry.arguments?.getString("projectId"),
                 appContainer.projectRepository,
                 actions.upPress,
-                scaffoldState = scaffoldState
+                scaffoldState = scaffoldState,
+                lifecycleScope = lifecycleScope
             )
         }
     }
