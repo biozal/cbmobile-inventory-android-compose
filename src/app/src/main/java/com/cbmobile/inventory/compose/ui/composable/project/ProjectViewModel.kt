@@ -10,7 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
-class ProjectViewModel(private val projectId: String?, private val projectRepository: ProjectRepository)
+class ProjectViewModel(private val projectId: String?,
+                       private val projectRepository: ProjectRepository)
     : ViewModel() {
     private var _project: Project? = null
     val projectName: MutableLiveData<String> = MutableLiveData<String>()
@@ -34,12 +35,12 @@ class ProjectViewModel(private val projectId: String?, private val projectReposi
     }
 
     fun onProjectNameChanged(newValue: String){
-        _project?.name = newValue
+        _project?.name = newValue.trim()
         projectName.value = newValue
     }
 
     fun onProjectDescriptionChanged(newValue: String){
-        _project?.description = newValue
+        _project?.description = newValue.trim()
         projectDescription.value = newValue
     }
 

@@ -16,6 +16,7 @@ import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.LocationWrapper
 import com.cbmobile.inventory.compose.models.Project
+import com.cbmobile.inventory.compose.models.ProjectWrapper
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -59,7 +60,23 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
     }
 
     override suspend fun getProjects(): List<Project> {
-        TODO("Not yet implemented")
+        var list = ArrayList<Project>()
+        return withContext(Dispatchers.IO) {
+            try {
+                val db =
+                    databaseResources.databases[databaseResources.projectDatabaseName]?.database
+                val query =
+                    db?.createQuery("SELECT * FROM project WHERE type = \"project\"")
+                query?.execute()?.forEach {
+                    val json = it.toJSON()
+                    val projectWrapper = Gson().fromJson(json, ProjectWrapper::class.java)
+                    list.add(projectWrapper.project)
+                }
+            } catch (e: Exception){
+                android.util.Log.e(e.message, e.stackTraceToString())
+            }
+            return@withContext list
+        }
     }
 
     override suspend fun getLocations(): List<Location> {
@@ -74,7 +91,6 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
                     val json = it.toJSON()
                     val locationWrapper = Gson().fromJson(json, LocationWrapper::class.java)
                     locationResults.add(locationWrapper.location)
-
                 }
             } catch (e: Exception) {
                 android.util.Log.e(e.message, e.stackTraceToString())
