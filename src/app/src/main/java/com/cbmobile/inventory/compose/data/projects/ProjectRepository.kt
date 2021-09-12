@@ -9,6 +9,8 @@ interface ProjectRepository {
 
     suspend fun getProject(projectId: String): Project
 
+    suspend fun deleteProject(projectId: String) : Boolean
+
     suspend fun getProjects(): List<Project>
 
     suspend fun getLocations(): List<Location>

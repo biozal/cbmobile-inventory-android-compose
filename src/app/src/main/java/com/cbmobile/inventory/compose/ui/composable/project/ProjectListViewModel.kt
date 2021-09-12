@@ -35,4 +35,17 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
             }
         }
     }
+
+    val deleteProject: (String) -> Boolean = { projectId: String ->
+        var didDelete = false
+        viewModelScope.launch(Dispatchers.IO){
+            didDelete = projectRepository.deleteProject(projectId)
+            if (didDelete){
+                //TODO send message to snackbar
+                val newProjects = _projects.value?.filter { p -> p.projectId != projectId }
+                _projects.postValue(newProjects)
+            }
+        }
+        didDelete
+    }
 }

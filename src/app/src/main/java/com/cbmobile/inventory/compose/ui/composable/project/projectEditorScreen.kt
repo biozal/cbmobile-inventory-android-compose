@@ -34,14 +34,15 @@ fun ProjectEditorScreen(
             color = MaterialTheme.colors.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            ProjectEditor(viewModel, lifecycleScope)
+            ProjectEditor(viewModel, lifecycleScope, navigateUp)
         }
     }
 }
 
 @Composable
 fun ProjectEditor(viewModel: ProjectViewModel,
-                  lifecycleScope: LifecycleCoroutineScope){
+                  lifecycleScope: LifecycleCoroutineScope,
+                  navigateUp: () -> Unit){
     val snackbarHostState = remember{SnackbarHostState()}
     val nameState = viewModel.projectName.observeAsState(initial = "")
     val descriptionState = viewModel.projectDescription.observeAsState(initial = "")
@@ -79,6 +80,7 @@ fun ProjectEditor(viewModel: ProjectViewModel,
                             duration = SnackbarDuration.Short
                         )
                     }
+                    navigateUp()
                     })
             {
                 Text("Save", style = MaterialTheme.typography.h5)

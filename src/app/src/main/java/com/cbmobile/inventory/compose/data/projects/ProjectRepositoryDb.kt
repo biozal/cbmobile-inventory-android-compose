@@ -79,6 +79,24 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         }
     }
 
+    override suspend fun deleteProject(projectId: String): Boolean {
+        var result = false;
+        return withContext(Dispatchers.IO){
+            try {
+                val db =
+                    databaseResources.databases[databaseResources.projectDatabaseName]?.database
+                val projectDoc = db?.getDocument(projectId)
+                if (projectDoc != null && projectDoc.id == projectId){
+                    db.delete(projectDoc)
+                    result = true
+                }
+            } catch (e: java.lang.Exception) {
+                android.util.Log.e(e.message, e.stackTraceToString())
+            }
+            return@withContext result
+        }
+    }
+
     override suspend fun getLocations(): List<Location> {
         return withContext(Dispatchers.IO) {
             var locationResults = ArrayList<Location>()

@@ -6,12 +6,15 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
 import java.util.UUID
 import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.data.projects.ProjectRepositoryMock
@@ -39,14 +42,22 @@ fun ProjectListScreen(
                 color = MaterialTheme.colors.background,
                 modifier = Modifier.fillMaxSize()
             ) {
-                ProjectList(projects.value, isLoading.value)
+                ProjectList(projects.value,
+                            isLoading.value,
+                            navigateToProjectEditor,
+                            viewModel.deleteProject)
             }
         }
     }
 }
 
 @Composable
-fun ProjectList(items: List<Project>, isLoading: Boolean) {
+fun ProjectList(
+    items: List<Project>,
+    isLoading: Boolean,
+    onEditChange: (String) -> Unit,
+    onDeleteChange: (String) -> Boolean)
+{
 
     if (isLoading && items.isEmpty()) {
         HorizontalDottedProgressBar()
@@ -59,7 +70,7 @@ fun ProjectList(items: List<Project>, isLoading: Boolean) {
             modifier = Modifier .padding(16.dp)) {
             for (project in items) {
                 item {  
-                    ProjectCard(project) 
+                    ProjectCard(project, onEditChange, onDeleteChange)
                     Spacer(modifier = Modifier.padding(top = 30.dp))
                 }
             }
@@ -68,7 +79,11 @@ fun ProjectList(items: List<Project>, isLoading: Boolean) {
 }
 
 @Composable
-fun ProjectCard(project: Project){
+fun ProjectCard(project: Project,
+                onEditChange: (String) -> Unit,
+                onDeleteChange: (String) -> Boolean)
+{
+    var expanded by remember { mutableStateOf(false) }
     Card(
         shape = MaterialTheme.shapes.small,
         backgroundColor = MaterialTheme.colors.surface,
@@ -81,13 +96,55 @@ fun ProjectCard(project: Project){
             modifier = Modifier
                 .height(160.dp)
                 .padding(16.dp)
-        ){
-            Text(text = project.name,
-                style = MaterialTheme.typography.h5)
-            Text(modifier = Modifier.padding(top = 10.dp),
-                text = project.description,
-                style = MaterialTheme.typography.subtitle1,
-                color = Color.DarkGray)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            )
+            {
+                Text(
+                    modifier = Modifier.fillMaxWidth(0.85f)
+                        .wrapContentWidth(Alignment.Start)
+                        .padding(top = 10.dp),
+                    text = project.name,
+                    style = MaterialTheme.typography.h6
+                )
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                            .align(Alignment.CenterVertically)
+                            .wrapContentSize(Alignment.TopEnd)
+                )
+                {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Localized description")
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false })
+                    {
+                        DropdownMenuItem(onClick = {
+                            onEditChange(project.projectId)
+                        }) {
+                            Text("Edit")
+                        }
+                        DropdownMenuItem(onClick = {
+                            val results = onDeleteChange(project.projectId)
+                            //TODO bring up snackbar with message to show we deleted
+                            expanded = false
+                            android.util.Log.i("DELETE-STATUS", results.toString())
+                        }) {
+                            Text("Delete")
+                        }
+                    }
+                }
+            }
+            Row( modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    modifier = Modifier.padding(top = 10.dp),
+                    text = project.description,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = Color.DarkGray
+                )
+            }
         }
     }
 }
@@ -122,7 +179,11 @@ fun ProjectListScreenPreview() {
                 color = MaterialTheme.colors.background,
                 modifier = Modifier.fillMaxSize()
             ) {
-                ProjectList(viewModel.projects.value!!, viewModel.isLoading.value!!)
+                ProjectList(
+                    viewModel.projects.value!!,
+                    viewModel.isLoading.value!!,
+                    navigateToProjectEditor,
+                    viewModel.deleteProject)
             }
         }
     }
