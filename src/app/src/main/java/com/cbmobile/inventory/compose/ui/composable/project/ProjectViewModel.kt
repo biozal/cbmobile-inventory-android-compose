@@ -1,60 +1,53 @@
 package com.cbmobile.inventory.compose.ui.composable.project
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.Project
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
 class ProjectViewModel(private val projectId: String?,
                        private val projectRepository: ProjectRepository)
     : ViewModel() {
-    private var _project: Project? = null
-    val projectName: MutableLiveData<String> = MutableLiveData<String>()
-    val projectDescription: MutableLiveData<String> = MutableLiveData<String>()
-
-    val locations: MutableLiveData<List<Location>> by lazy {
-        MutableLiveData<List<Location>>()
-    }
+    var project = mutableStateOf(Project())
+    val locations = mutableListOf<Location>()
 
     init {
         viewModelScope.launch {
             val results = projectRepository.getLocations()
-            locations.value = results
+            for (result in results) {
+                locations.add(result)
+            }
             if (projectId == null){
-                _project = projectRepository.getProject(UUID.randomUUID().toString())
+                project.value = projectRepository.getProject(UUID.randomUUID().toString())
             }
             else {
-                _project = projectRepository.getProject(projectId)
+                project.value = projectRepository.getProject(projectId)
             }
         }
     }
 
-    fun onProjectNameChanged(newValue: String){
-        _project?.name = newValue.trim()
-        projectName.value = newValue
+    val onNameChanged: (String) -> Unit = { newValue ->
+        val p = project.value.copy()
+        p.name = newValue
+        project.value = p
     }
 
-    fun onProjectDescriptionChanged(newValue: String){
-        _project?.description = newValue.trim()
-        projectDescription.value = newValue
+    val onDescriptionChanged: (String) -> Unit = { newValue ->
+        val p = project.value.copy()
+        p.description = newValue
+        project.value = p
     }
 
-    fun saveProject() : String {
-        var message = ""
-        if (_project != null && _project!!.name != "")  {
-            viewModelScope.launch {
-                val results = projectRepository.saveProject(_project!!)
-                message = if (results) "Project was saved" else "Error: Could not save project at this time"
-            }
-        } else {
-            message = "Error: project name must be set before saving"
-        }
-        return message
+    val onSaveProject: () -> Unit = {
+        viewModelScope.launch {
+            project.value.name = project.value.name.trim()
+            project.value.description = project.value.description.trim()
+            val results = projectRepository.saveProject(project.value)
+       }
     }
-
 }

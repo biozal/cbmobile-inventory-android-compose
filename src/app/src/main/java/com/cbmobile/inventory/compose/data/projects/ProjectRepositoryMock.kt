@@ -11,14 +11,14 @@ class ProjectRepositoryMock : ProjectRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun saveProject(project: Project) : Boolean {
+    override suspend fun saveProject(project: Project) {
         TODO("Not yet implemented")
     }
     override suspend fun getProject(projectId: String): Project {
         TODO("Not yet implemented")
     }
 
-    override suspend fun deleteProject(projectId: String): Boolean {
+    override suspend fun deleteProject(projectId: String) : Boolean {
         TODO("Not yet implemented")
     }
 

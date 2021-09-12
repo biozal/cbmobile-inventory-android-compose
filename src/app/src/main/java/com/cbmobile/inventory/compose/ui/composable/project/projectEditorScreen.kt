@@ -14,6 +14,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleCoroutineScope
 
 import com.cbmobile.inventory.compose.data.projects.*
+import com.cbmobile.inventory.compose.models.Project
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 import kotlinx.coroutines.launch
 import java.util.*
@@ -34,33 +35,41 @@ fun ProjectEditorScreen(
             color = MaterialTheme.colors.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            ProjectEditor(viewModel, lifecycleScope, navigateUp)
+            ProjectEditor(
+                viewModel.project.value,
+                viewModel.onNameChanged,
+                viewModel.onDescriptionChanged,
+                viewModel.onSaveProject,
+                lifecycleScope,
+                navigateUp)
         }
     }
 }
 
 @Composable
-fun ProjectEditor(viewModel: ProjectViewModel,
-                  lifecycleScope: LifecycleCoroutineScope,
-                  navigateUp: () -> Unit){
-    val snackbarHostState = remember{SnackbarHostState()}
-    val nameState = viewModel.projectName.observeAsState(initial = "")
-    val descriptionState = viewModel.projectDescription.observeAsState(initial = "")
+fun ProjectEditor(
+                project: Project,
+                onNameChange: (String) -> Unit,
+                onDescriptionChange: (String) -> Unit,
+                onSaveProject: () -> Unit,
+                lifecycleScope: LifecycleCoroutineScope,
+                navigateUp: () -> Unit){
+    //val snackbarHostState = remember{SnackbarHostState()}
     Column(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight()
         .padding(16.dp)) {
         OutlinedTextField(
-            value = nameState.value,
-            onValueChange = viewModel::onProjectNameChanged,
+            value = project.name,
+            onValueChange = onNameChange,
             label = { Text("Name") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 10.dp)
         )
         OutlinedTextField(
-            value = descriptionState.value,
-            onValueChange = viewModel::onProjectDescriptionChanged,
+            value = project.description,
+            onValueChange = onDescriptionChange,
             label = { Text("Description") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,14 +81,14 @@ fun ProjectEditor(viewModel: ProjectViewModel,
             .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally) {
             Button(modifier = Modifier.padding(top = 32.dp), onClick = {
-                val resultMessage = viewModel.saveProject()
-                    lifecycleScope.launch {
+                val resultMessage = onSaveProject()
+                    /* lifecycleScope.launch {
                         snackbarHostState.showSnackbar(
                             message = resultMessage,
                             actionLabel = "",
                             duration = SnackbarDuration.Short
                         )
-                    }
+                    } */
                     navigateUp()
                     })
             {

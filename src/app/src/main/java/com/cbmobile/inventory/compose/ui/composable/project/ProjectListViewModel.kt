@@ -41,7 +41,6 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
         viewModelScope.launch(Dispatchers.IO){
             didDelete = projectRepository.deleteProject(projectId)
             if (didDelete){
-                //TODO send message to snackbar
                 val newProjects = _projects.value?.filter { p -> p.projectId != projectId }
                 _projects.postValue(newProjects)
             }

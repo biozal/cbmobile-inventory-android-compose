@@ -11,7 +11,7 @@ class AuditRepositoryMock : AuditRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun deleteAudit(auditId: String) {
+    override suspend fun deleteAudit(auditId: String) : Boolean {
         TODO("Not yet implemented")
     }
 }

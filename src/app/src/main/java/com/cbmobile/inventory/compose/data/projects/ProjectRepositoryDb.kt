@@ -23,19 +23,20 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectRepositoryDb(var context: Context) : ProjectRepository {
-
     private val databaseResources: InventoryDatabase = InventoryDatabase.getInstance(context)
 
     override suspend fun completeProject(projectId: String) {
         return withContext(Dispatchers.IO){
             try{
                 val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                //TODO use key/value pair to update the document and using kotlin let so we don't
-                // force null checks
-                val doc = db?.getDocument(projectId)
-                val mutDoc = doc?.toMutable()
-                mutDoc?.setBoolean("complete", true)
-                db?.save(mutDoc!!)
+                db?.let { database ->
+                    val doc = database.getDocument(projectId)
+                    doc?.let { document ->
+                        val mutDoc = document.toMutable()
+                        mutDoc.setBoolean("complete", true)
+                        database.save(mutDoc)
+                    }
+                }
             } catch(e: java.lang.Exception){
                 android.util.Log.e(e.message, e.stackTraceToString())
             }
@@ -59,8 +60,7 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         }
     }
 
-    override suspend fun saveProject(project: Project) : Boolean {
-        var results = false;
+    override suspend fun saveProject(project: Project) {
         return withContext(Dispatchers.IO) {
            try{
                val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
@@ -68,12 +68,10 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
                    val json = Gson().toJson(project)
                    val doc = MutableDocument(project.projectId, json)
                    database.save(doc)
-                   results = true
                }
            } catch (e: Exception){
                android.util.Log.e(e.message, e.stackTraceToString())
            }
-            return@withContext results
         }
     }
 
@@ -84,11 +82,11 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
                 val db =
                     databaseResources.databases[databaseResources.projectDatabaseName]?.database
                 db?.let { database ->
-                    val query = database.createQuery("SELECT * FROM project WHERE type = \"project\"")
+                    val query = database.createQuery("SELECT * FROM project AS item WHERE type = \"project\"")
                     query.execute().forEach { project ->
                         val json = project.toJSON()
                         val projectWrapper = Gson().fromJson(json, ProjectWrapper::class.java)
-                        list.add(projectWrapper.project)
+                        list.add(projectWrapper.item)
                     }
                 }
             } catch (e: Exception){
@@ -98,9 +96,9 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         }
     }
 
-    override suspend fun deleteProject(projectId: String): Boolean {
-        var result = false;
+    override suspend fun deleteProject(projectId: String) : Boolean {
         return withContext(Dispatchers.IO){
+            var result = false
             try {
                 val db =
                     databaseResources.databases[databaseResources.projectDatabaseName]?.database
@@ -180,7 +178,6 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
                                 Expression.property("projectId"),
                             )))
                 }
-
                 //store pointers for later use
                 val databaseResource = DatabaseResource(database, dbConfig)
                 databaseResources.databases[databaseResources.projectDatabaseName] =

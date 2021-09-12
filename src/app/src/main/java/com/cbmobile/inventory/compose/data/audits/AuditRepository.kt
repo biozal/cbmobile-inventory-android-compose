@@ -8,5 +8,5 @@ interface AuditRepository {
 
     suspend fun saveAudit(audit: Audit)
 
-    suspend fun deleteAudit(auditId: String)
+    suspend fun deleteAudit(auditId: String) : Boolean
 }

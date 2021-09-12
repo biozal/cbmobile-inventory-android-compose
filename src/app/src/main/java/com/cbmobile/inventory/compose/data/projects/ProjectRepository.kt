@@ -7,7 +7,7 @@ interface ProjectRepository {
 
     suspend fun completeProject(projectId: String)
 
-    suspend fun saveProject(project: Project) : Boolean
+    suspend fun saveProject(project: Project)
 
     suspend fun getProject(projectId: String): Project
 
