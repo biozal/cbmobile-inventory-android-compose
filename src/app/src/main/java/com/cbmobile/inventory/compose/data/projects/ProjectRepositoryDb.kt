@@ -26,20 +26,36 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
 
     private val databaseResources: InventoryDatabase = InventoryDatabase.getInstance(context)
 
+    override suspend fun completeProject(projectId: String) {
+        return withContext(Dispatchers.IO){
+            try{
+                val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
+                //TODO use key/value pair to update the document and using kotlin let so we don't
+                // force null checks
+                val doc = db?.getDocument(projectId)
+                val mutDoc = doc?.toMutable()
+                mutDoc?.setBoolean("complete", true)
+                db?.save(mutDoc!!)
+            } catch(e: java.lang.Exception){
+                android.util.Log.e(e.message, e.stackTraceToString())
+            }
+        }
+    }
+
     override suspend fun getProject(projectId: String): Project {
         return withContext(Dispatchers.IO){
             try {
                 val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                val doc = db?.getDocument(projectId)
-                if (doc == null){
-                    return@withContext Project(projectId, "", "", false, "project", null)
-                } else {
-                    return@withContext Gson().fromJson(doc.toJSON(), Project::class.java)
+                db?.let { database ->
+                    val doc = database.getDocument(projectId)
+                    doc?.let { document  ->
+                        return@withContext Gson().fromJson(document.toJSON(), Project::class.java)
+                    }
                 }
             } catch (e: Exception) {
                 android.util.Log.e(e.message, e.stackTraceToString())
             }
-            return@withContext Project(projectId, "", "", false, "project", null)
+            return@withContext Project(projectId, "", "", false, "project", null, null)
         }
     }
 
@@ -48,10 +64,12 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         return withContext(Dispatchers.IO) {
            try{
                val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
-               val json = Gson().toJson(project)
-               val doc = MutableDocument(project.projectId, json)
-               db?.save(doc)
-               results = true
+               db?.let { database ->
+                   val json = Gson().toJson(project)
+                   val doc = MutableDocument(project.projectId, json)
+                   database.save(doc)
+                   results = true
+               }
            } catch (e: Exception){
                android.util.Log.e(e.message, e.stackTraceToString())
            }
@@ -60,17 +78,18 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
     }
 
     override suspend fun getProjects(): List<Project> {
-        var list = ArrayList<Project>()
+        val list = ArrayList<Project>()
         return withContext(Dispatchers.IO) {
             try {
                 val db =
                     databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                val query =
-                    db?.createQuery("SELECT * FROM project WHERE type = \"project\"")
-                query?.execute()?.forEach {
-                    val json = it.toJSON()
-                    val projectWrapper = Gson().fromJson(json, ProjectWrapper::class.java)
-                    list.add(projectWrapper.project)
+                db?.let { database ->
+                    val query = database.createQuery("SELECT * FROM project WHERE type = \"project\"")
+                    query.execute().forEach { project ->
+                        val json = project.toJSON()
+                        val projectWrapper = Gson().fromJson(json, ProjectWrapper::class.java)
+                        list.add(projectWrapper.project)
+                    }
                 }
             } catch (e: Exception){
                 android.util.Log.e(e.message, e.stackTraceToString())
@@ -85,10 +104,12 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
             try {
                 val db =
                     databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                val projectDoc = db?.getDocument(projectId)
-                if (projectDoc != null && projectDoc.id == projectId){
-                    db.delete(projectDoc)
-                    result = true
+                db?.let { database ->
+                    val projectDoc = database.getDocument(projectId)
+                    projectDoc?.let { document ->
+                        db.delete(document)
+                        result = true
+                    }
                 }
             } catch (e: java.lang.Exception) {
                 android.util.Log.e(e.message, e.stackTraceToString())
@@ -103,12 +124,13 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
             try {
                 val db =
                     databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                val query =
-                    db?.createQuery("SELECT * FROM project AS location WHERE type = \"location\"")
-                query?.execute()?.forEach {
-                    val json = it.toJSON()
-                    val locationWrapper = Gson().fromJson(json, LocationWrapper::class.java)
-                    locationResults.add(locationWrapper.location)
+                db?.let { database ->
+                    val query = database.createQuery("SELECT * FROM project AS location WHERE type = \"location\"")
+                    query.execute().forEach { location ->
+                        val json = location.toJSON()
+                        val locationWrapper = Gson().fromJson(json, LocationWrapper::class.java)
+                        locationResults.add(locationWrapper.location)
+                   }
                 }
             } catch (e: Exception) {
                 android.util.Log.e(e.message, e.stackTraceToString())
@@ -151,21 +173,27 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
                                 Expression.property("type")
                             )))
                 }
+                if (!database.indexes.contains("projectIndex")){
+                    database.createIndex(
+                        "projectIndex", IndexBuilder.valueIndex(
+                            ValueIndexItem.expression(
+                                Expression.property("projectId"),
+                            )))
+                }
 
                 //store pointers for later use
                 val databaseResource = DatabaseResource(database, dbConfig)
                 databaseResources.databases[databaseResources.projectDatabaseName] =
                     databaseResource
-
             } catch (e: Exception) {
                 android.util.Log.e(e.message, e.stackTraceToString())
             }
         }
     }
 
-    private fun unzip(`in`: InputStream, destination: File) {
+    private fun unzip(stream: InputStream, destination: File) {
         val buffer = ByteArray(1024)
-        val zis = ZipInputStream(`in`)
+        val zis = ZipInputStream(stream)
         var ze: ZipEntry? = zis.nextEntry
         while (ze != null) {
             val fileName: String = ze.name
@@ -185,6 +213,6 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         }
         zis.closeEntry()
         zis.close()
-        `in`.close()
+        stream.close()
     }
 }
