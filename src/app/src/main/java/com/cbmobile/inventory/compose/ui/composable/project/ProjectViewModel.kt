@@ -6,10 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.Project
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import java.util.*
 
-class ProjectViewModel(private val projectId: String?,
+class ProjectViewModel(private val projectJson: String?,
                        private val projectRepository: ProjectRepository)
     : ViewModel() {
     var project = mutableStateOf(Project())
@@ -21,11 +22,10 @@ class ProjectViewModel(private val projectId: String?,
             for (result in results) {
                 locations.add(result)
             }
-            if (projectId == null){
+            if (projectJson == null || projectJson == "create") {
                 project.value = projectRepository.getProject(UUID.randomUUID().toString())
-            }
-            else {
-                project.value = projectRepository.getProject(projectId)
+            } else {
+                project.value = Gson().fromJson(projectJson, Project::class.java)
             }
         }
     }

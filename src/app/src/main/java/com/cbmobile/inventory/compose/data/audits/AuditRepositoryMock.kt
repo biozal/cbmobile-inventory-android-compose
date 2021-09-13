@@ -7,6 +7,10 @@ class AuditRepositoryMock : AuditRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun getAudit(auditId: String): Audit {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun saveAudit(audit: Audit) {
         TODO("Not yet implemented")
     }

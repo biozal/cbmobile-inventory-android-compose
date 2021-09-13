@@ -22,6 +22,7 @@ import com.cbmobile.inventory.compose.ui.composable.NoItemsFound
 import com.cbmobile.inventory.compose.ui.composable.components.AddButton
 import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -112,7 +113,10 @@ fun ProjectCard(project: Project,
             .padding(top = 6.dp, bottom = 6.dp)
             .fillMaxWidth(),
         elevation = 8.dp,
-        onClick = { onProjectSelected(project.projectId) }
+        onClick = {
+            val projectJson = Gson().toJson(project)
+            onProjectSelected(projectJson)
+        }
     ) {
         Column(
             modifier = Modifier
@@ -146,7 +150,8 @@ fun ProjectCard(project: Project,
                         onDismissRequest = { expanded = false })
                     {
                         DropdownMenuItem(onClick = {
-                            onEditChange(project.projectId)
+                            var projectJson = Gson().toJson(project)
+                            onEditChange(projectJson)
                         }) {
                             Text("Edit")
                         }

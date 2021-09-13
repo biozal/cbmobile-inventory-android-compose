@@ -17,7 +17,7 @@ fun AddButton(onClick: (String) -> Unit) {
         elevation = FloatingActionButtonDefaults.elevation(),
         shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
         onClick = {
-            onClick(UUID.randomUUID().toString())
+            onClick("create")
         })
     {
         Icon(

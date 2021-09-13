@@ -20,11 +20,20 @@ import com.cbmobile.inventory.compose.models.Project
 import com.cbmobile.inventory.compose.models.ProjectWrapper
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import java.util.*
+import kotlin.collections.ArrayList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectRepositoryDb(private var context: Context) : ProjectRepository {
     private val databaseResources: InventoryDatabase = InventoryDatabase.getInstance(context)
+
+    private val _documentChanges: Flow<DocumentChange>? = null
+    override val documentChanges: Flow<DocumentChange>?
+        get() {
+            return _documentChanges
+        }
 
     override suspend fun getProject(projectId: String): Project {
         return withContext(Dispatchers.IO){
@@ -39,7 +48,7 @@ class ProjectRepositoryDb(private var context: Context) : ProjectRepository {
             } catch (e: Exception) {
                 android.util.Log.e(e.message, e.stackTraceToString())
             }
-            return@withContext Project(projectId, "", "", false, "project", null, null)
+            return@withContext Project(UUID.randomUUID().toString())
         }
     }
 

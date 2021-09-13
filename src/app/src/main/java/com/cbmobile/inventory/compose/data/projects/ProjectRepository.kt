@@ -2,9 +2,13 @@ package com.cbmobile.inventory.compose.data.projects
 
 import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.Project
+import com.couchbase.lite.DocumentChange
+import kotlinx.coroutines.flow.Flow
 
 interface ProjectRepository {
 
+    val documentChanges: Flow<DocumentChange>?
+    
     suspend fun completeProject(projectId: String)
 
     suspend fun saveProject(project: Project)
