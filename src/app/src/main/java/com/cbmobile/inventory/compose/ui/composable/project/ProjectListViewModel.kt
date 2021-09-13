@@ -30,9 +30,9 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
             when {
                 projectsData.any() -> {
                     _projects.postValue(projectsData)
-                    _loading.postValue(false)
                 }
             }
+            _loading.postValue(false)
         }
     }
 

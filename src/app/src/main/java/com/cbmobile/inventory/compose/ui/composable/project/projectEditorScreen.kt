@@ -3,21 +3,15 @@ package com.cbmobile.inventory.compose.ui.composable.project
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.lifecycle.lifecycleScope
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleCoroutineScope
 
 import com.cbmobile.inventory.compose.data.projects.*
 import com.cbmobile.inventory.compose.models.Project
+import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
-import kotlinx.coroutines.launch
-import java.util.*
 
 @Composable
 fun ProjectEditorScreen(
@@ -31,18 +25,23 @@ fun ProjectEditorScreen(
 
     InventoryTheme {
         // A surface container using the 'background' color from the theme
-        Surface(
-            color = MaterialTheme.colors.background,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            ProjectEditor(
-                viewModel.project.value,
-                viewModel.onNameChanged,
-                viewModel.onDescriptionChanged,
-                viewModel.onSaveProject,
-                lifecycleScope,
-                navigateUp)
-        }
+        Scaffold(scaffoldState = scaffoldState,
+            topBar = { InventoryAppBar(title = "Project Editor") })
+            {
+                Surface(
+                    color = MaterialTheme.colors.background,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    ProjectEditor(
+                        viewModel.project.value,
+                        viewModel.onNameChanged,
+                        viewModel.onDescriptionChanged,
+                        viewModel.onSaveProject,
+                        lifecycleScope,
+                        navigateUp
+                    )
+                }
+            }
     }
 }
 

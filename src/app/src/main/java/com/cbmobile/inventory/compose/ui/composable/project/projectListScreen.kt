@@ -2,32 +2,36 @@ package com.cbmobile.inventory.compose.ui.composable.project
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-import java.util.UUID
 import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.data.projects.ProjectRepositoryMock
 import com.cbmobile.inventory.compose.models.Project
 import com.cbmobile.inventory.compose.ui.composable.HorizontalDottedProgressBar
 import com.cbmobile.inventory.compose.ui.composable.NoItemsFound
+import com.cbmobile.inventory.compose.ui.composable.components.AddButton
+import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProjectListScreen(
     projectRepository: ProjectRepository,
     navigateToProjectEditor: (String) -> Unit,
-    scaffoldState: ScaffoldState = rememberScaffoldState()) {
+    navigateToAuditListByProject: (String) -> Unit,
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackBarCoroutineScope: CoroutineScope) {
 
     val viewModel = ProjectListViewModel(projectRepository)
     val projects = viewModel.projects.observeAsState(ArrayList<Project>())
@@ -36,6 +40,7 @@ fun ProjectListScreen(
     InventoryTheme {
         // A surface container using the 'background' color from the theme
         Scaffold(scaffoldState = scaffoldState,
+            topBar = { InventoryAppBar(title = "Projects")},
             floatingActionButton = { AddButton(navigateToProjectEditor) })
         {
             Surface(
@@ -44,21 +49,27 @@ fun ProjectListScreen(
             ) {
                 ProjectList(projects.value,
                             isLoading.value,
+                            navigateToAuditListByProject,
                             navigateToProjectEditor,
-                            viewModel.deleteProject)
+                            viewModel.deleteProject,
+                            snackBarCoroutineScope,
+                            scaffoldState)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProjectList(
     items: List<Project>,
     isLoading: Boolean,
+    onProjectSelected: (String) -> Unit,
     onEditChange: (String) -> Unit,
-    onDeleteChange: (String) -> Boolean)
+    onDeleteChange: (String) -> Boolean,
+    snackBarCoroutineScope: CoroutineScope,
+    scaffoldState: ScaffoldState)
 {
-
     if (isLoading && items.isEmpty()) {
         HorizontalDottedProgressBar()
     }
@@ -70,7 +81,13 @@ fun ProjectList(
             modifier = Modifier .padding(16.dp)) {
             for (project in items) {
                 item {  
-                    ProjectCard(project, onEditChange, onDeleteChange)
+                    ProjectCard(
+                        project,
+                        onProjectSelected,
+                        onEditChange,
+                        onDeleteChange,
+                        snackBarCoroutineScope,
+                        scaffoldState)
                     Spacer(modifier = Modifier.padding(top = 30.dp))
                 }
             }
@@ -78,10 +95,14 @@ fun ProjectList(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProjectCard(project: Project,
+                onProjectSelected: (String) -> Unit,
                 onEditChange: (String) -> Unit,
-                onDeleteChange: (String) -> Boolean)
+                onDeleteChange: (String) -> Boolean,
+                snackBarCoroutineScope: CoroutineScope,
+                scaffoldState: ScaffoldState)
 {
     var expanded by remember { mutableStateOf(false) }
     Card(
@@ -90,7 +111,8 @@ fun ProjectCard(project: Project,
         modifier = Modifier
             .padding(top = 6.dp, bottom = 6.dp)
             .fillMaxWidth(),
-        elevation = 8.dp
+        elevation = 8.dp,
+        onClick = { onProjectSelected(project.projectId) }
     ) {
         Column(
             modifier = Modifier
@@ -102,16 +124,18 @@ fun ProjectCard(project: Project,
             )
             {
                 Text(
-                    modifier = Modifier.fillMaxWidth(0.85f)
+                    modifier = Modifier
+                        .fillMaxWidth(0.85f)
                         .wrapContentWidth(Alignment.Start)
                         .padding(top = 10.dp),
                     text = project.name,
                     style = MaterialTheme.typography.h6
                 )
                 Box(
-                    modifier = Modifier.fillMaxWidth()
-                            .align(Alignment.CenterVertically)
-                            .wrapContentSize(Alignment.TopEnd)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterVertically)
+                        .wrapContentSize(Alignment.TopEnd)
                 )
                 {
                     IconButton(onClick = { expanded = true }) {
@@ -128,9 +152,12 @@ fun ProjectCard(project: Project,
                         }
                         DropdownMenuItem(onClick = {
                             val results = onDeleteChange(project.projectId)
-                            //TODO bring up snackbar with message to show we deleted
                             expanded = false
-                            android.util.Log.i("DELETE-STATUS", results.toString())
+                            if (!results) {
+                                snackBarCoroutineScope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar("The project was deleted from database")
+                                }
+                            }
                         }) {
                             Text("Delete")
                         }
@@ -139,7 +166,9 @@ fun ProjectCard(project: Project,
             }
             Row( modifier = Modifier.fillMaxWidth()) {
                 Text(
+                    maxLines = 3,
                     modifier = Modifier.padding(top = 10.dp),
+                    overflow = TextOverflow.Ellipsis,
                     text = project.description,
                     style = MaterialTheme.typography.subtitle1,
                     color = Color.DarkGray
@@ -149,29 +178,18 @@ fun ProjectCard(project: Project,
     }
 }
 
-@Composable
-fun AddButton(navigateToProjectEditor: (String) -> Unit) {
-    FloatingActionButton(
-        backgroundColor = MaterialTheme.colors.primary,
-        elevation = FloatingActionButtonDefaults.elevation(),
-        shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-        onClick = {
-            navigateToProjectEditor(UUID.randomUUID().toString())
-        })
-    {
-        Icon(
-            Icons.Default.Add,
-            contentDescription = "add project"
-        )
-    }
-}
-
-
 @Preview(showBackground = true)
 @Composable
 fun ProjectListScreenPreview() {
+
     val navigateToProjectEditor: (String) -> Unit = { _ : String -> }
+    val onProjectSelected: (String) -> Unit = { _ : String -> }
+    val onEditChange: (String) -> Unit = { _ : String -> }
+    val onDeleteChange: (String) -> Boolean  = { _: String -> false }
     val viewModel = ProjectListViewModel(ProjectRepositoryMock())
+    val scaffoldState:ScaffoldState = rememberScaffoldState()
+    val corouteScope = rememberCoroutineScope()
+
     InventoryTheme {
         Scaffold(floatingActionButton = { AddButton(navigateToProjectEditor) })
         {
@@ -182,8 +200,11 @@ fun ProjectListScreenPreview() {
                 ProjectList(
                     viewModel.projects.value!!,
                     viewModel.isLoading.value!!,
-                    navigateToProjectEditor,
-                    viewModel.deleteProject)
+                    onProjectSelected,
+                    onEditChange,
+                    onDeleteChange,
+                    corouteScope,
+                    scaffoldState)
             }
         }
     }

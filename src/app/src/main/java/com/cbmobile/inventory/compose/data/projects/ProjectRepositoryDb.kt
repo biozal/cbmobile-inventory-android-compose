@@ -1,3 +1,5 @@
+@file:Suppress("SameParameterValue")
+
 package com.cbmobile.inventory.compose.data.projects
 
 import android.content.Context
@@ -5,7 +7,6 @@ import android.content.Context
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
@@ -22,26 +23,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProjectRepositoryDb(var context: Context) : ProjectRepository {
+class ProjectRepositoryDb(private var context: Context) : ProjectRepository {
     private val databaseResources: InventoryDatabase = InventoryDatabase.getInstance(context)
-
-    override suspend fun completeProject(projectId: String) {
-        return withContext(Dispatchers.IO){
-            try{
-                val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                db?.let { database ->
-                    val doc = database.getDocument(projectId)
-                    doc?.let { document ->
-                        val mutDoc = document.toMutable()
-                        mutDoc.setBoolean("complete", true)
-                        database.save(mutDoc)
-                    }
-                }
-            } catch(e: java.lang.Exception){
-                android.util.Log.e(e.message, e.stackTraceToString())
-            }
-        }
-    }
 
     override suspend fun getProject(projectId: String): Project {
         return withContext(Dispatchers.IO){
@@ -57,21 +40,6 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
                 android.util.Log.e(e.message, e.stackTraceToString())
             }
             return@withContext Project(projectId, "", "", false, "project", null, null)
-        }
-    }
-
-    override suspend fun saveProject(project: Project) {
-        return withContext(Dispatchers.IO) {
-           try{
-               val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
-               db?.let { database ->
-                   val json = Gson().toJson(project)
-                   val doc = MutableDocument(project.projectId, json)
-                   database.save(doc)
-               }
-           } catch (e: Exception){
-               android.util.Log.e(e.message, e.stackTraceToString())
-           }
         }
     }
 
@@ -96,6 +64,21 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         }
     }
 
+    override suspend fun saveProject(project: Project) {
+        return withContext(Dispatchers.IO) {
+           try{
+               val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
+               db?.let { database ->
+                   val json = Gson().toJson(project)
+                   val doc = MutableDocument(project.projectId, json)
+                   database.save(doc)
+               }
+           } catch (e: Exception){
+               android.util.Log.e(e.message, e.stackTraceToString())
+           }
+        }
+    }
+
     override suspend fun deleteProject(projectId: String) : Boolean {
         return withContext(Dispatchers.IO){
             var result = false
@@ -116,9 +99,27 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         }
     }
 
+    override suspend fun completeProject(projectId: String) {
+        return withContext(Dispatchers.IO){
+            try{
+                val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
+                db?.let { database ->
+                    val doc = database.getDocument(projectId)
+                    doc?.let { document ->
+                        val mutDoc = document.toMutable()
+                        mutDoc.setBoolean("complete", true)
+                        database.save(mutDoc)
+                    }
+                }
+            } catch(e: java.lang.Exception){
+                android.util.Log.e(e.message, e.stackTraceToString())
+            }
+        }
+    }
+
     override suspend fun getLocations(): List<Location> {
         return withContext(Dispatchers.IO) {
-            var locationResults = ArrayList<Location>()
+            val locationResults = ArrayList<Location>()
             try {
                 val db =
                     databaseResources.databases[databaseResources.projectDatabaseName]?.database
@@ -148,7 +149,8 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
 
                     //get location database zip file from apk, write to disk
                     val locationDbPath = File(context.filesDir.toString())
-                    unzip(context.assets.open("locations.zip"), locationDbPath)
+                    //unzip(context.assets.open("locations.zip"), locationDbPath)
+                    unzip("locations.zip", locationDbPath)
 
                     //copy the location database to the project database
                     val locationDbFile = File(
@@ -159,7 +161,6 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
                         ))
                     Database.copy(locationDbFile, databaseResources.projectDatabaseName, dbConfig)
                 }
-
                 //get database and store pointer for later use
                 val database = Database(databaseResources.projectDatabaseName, dbConfig)
 
@@ -188,28 +189,34 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
         }
     }
 
-    private fun unzip(stream: InputStream, destination: File) {
-        val buffer = ByteArray(1024)
-        val zis = ZipInputStream(stream)
-        var ze: ZipEntry? = zis.nextEntry
-        while (ze != null) {
-            val fileName: String = ze.name
-            val newFile = File(destination, fileName)
-            if (ze.isDirectory) {
-                newFile.mkdirs()
-            } else {
-                File(newFile.parent).mkdirs()
-                val fos = FileOutputStream(newFile)
-                var len: Int
-                while (zis.read(buffer).also { len = it } > 0) {
-                    fos.write(buffer, 0, len)
+    //private fun unzip(stream: InputStream, destination: File) {
+    private fun unzip(
+        file: String,
+        destination: File
+    ) {
+        context.assets.open(file).use { stream ->
+            val buffer = ByteArray(1024)
+            val zis = ZipInputStream(stream)
+            var ze: ZipEntry? = zis.nextEntry
+            while (ze != null) {
+                val fileName: String = ze.name
+                val newFile = File(destination, fileName)
+                if (ze.isDirectory) {
+                    newFile.mkdirs()
+                } else {
+                    File(newFile.parent!!).mkdirs()
+                    val fos = FileOutputStream(newFile)
+                    var len: Int
+                    while (zis.read(buffer).also { len = it } > 0) {
+                        fos.write(buffer, 0, len)
+                    }
+                    fos.close()
                 }
-                fos.close()
+                ze = zis.nextEntry
             }
-            ze = zis.nextEntry
+            zis.closeEntry()
+            zis.close()
+            stream.close()
         }
-        zis.closeEntry()
-        zis.close()
-        stream.close()
     }
 }

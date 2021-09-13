@@ -1,7 +1,6 @@
 package com.cbmobile.inventory.compose.ui.composable.project
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbmobile.inventory.compose.data.projects.ProjectRepository
