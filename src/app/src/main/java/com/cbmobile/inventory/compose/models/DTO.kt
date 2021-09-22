@@ -1,5 +1,5 @@
 package com.cbmobile.inventory.compose.models
 
-interface Wrapper<T> {
+interface DTO<T> {
     var item: T
 }

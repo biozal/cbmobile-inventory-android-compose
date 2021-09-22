@@ -16,6 +16,7 @@ import com.cbmobile.inventory.compose.ui.composable.audit.AuditListScreen
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectListScreen
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectEditorScreen
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.InternalCoroutinesApi
 
 /**
  * Destinations used in the ([InventoryApp])
@@ -37,6 +38,7 @@ object MainDestinations {
     const val SYNC_PTP_STATUS_ROUTE = "syncPTPSTATUS"
 }
 
+@OptIn(InternalCoroutinesApi::class)
 @Composable
 fun InventoryNavGraph(
     appContainer: AppContainer,
@@ -66,6 +68,7 @@ fun InventoryNavGraph(
             ProjectEditorScreen(
                 backstackEntry.arguments?.getString(MainDestinations.PROJECT_EDITOR_KEY_ID),
                 appContainer.projectRepository,
+                appContainer.locationRepository,
                 actions.upPress,
                 scaffoldState = scaffoldState,
                 lifecycleScope = lifecycleScope

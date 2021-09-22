@@ -24,8 +24,10 @@ import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 
+@InternalCoroutinesApi
 @Composable
 fun ProjectListScreen(
     projectRepository: ProjectRepository,
@@ -183,6 +185,7 @@ fun ProjectCard(project: Project,
     }
 }
 
+@InternalCoroutinesApi
 @Preview(showBackground = true)
 @Composable
 fun ProjectListScreenPreview() {

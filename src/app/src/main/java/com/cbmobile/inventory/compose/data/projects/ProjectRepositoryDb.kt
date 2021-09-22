@@ -15,25 +15,25 @@ import com.couchbase.lite.*
 import com.cbmobile.inventory.compose.data.DatabaseResource
 import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.models.Location
-import com.cbmobile.inventory.compose.models.LocationWrapper
+import com.cbmobile.inventory.compose.models.LocationDTO
 import com.cbmobile.inventory.compose.models.Project
-import com.cbmobile.inventory.compose.models.ProjectWrapper
+import com.cbmobile.inventory.compose.models.ProjectDTO
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.net.URI
 import java.util.*
 import kotlin.collections.ArrayList
 
+@InternalCoroutinesApi
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProjectRepositoryDb(private var context: Context) : ProjectRepository {
+class ProjectRepositoryDb(var context: Context) : ProjectRepository {
     private val databaseResources: InventoryDatabase = InventoryDatabase.getInstance(context)
-
-    private val _documentChanges: Flow<DocumentChange>? = null
-    override val documentChanges: Flow<DocumentChange>?
-        get() {
-            return _documentChanges
-        }
 
     override suspend fun getProject(projectId: String): Project {
         return withContext(Dispatchers.IO){
@@ -52,25 +52,57 @@ class ProjectRepositoryDb(private var context: Context) : ProjectRepository {
         }
     }
 
-    override suspend fun getProjects(): List<Project> {
-        val list = ArrayList<Project>()
-        return withContext(Dispatchers.IO) {
-            try {
-                val db =
-                    databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                db?.let { database ->
-                    val query = database.createQuery("SELECT * FROM project AS item WHERE type = \"project\"")
-                    query.execute().forEach { project ->
-                        val json = project.toJSON()
-                        val projectWrapper = Gson().fromJson(json, ProjectWrapper::class.java)
-                        list.add(projectWrapper.item)
-                    }
-                }
-            } catch (e: Exception){
-                android.util.Log.e(e.message, e.stackTraceToString())
-            }
-            return@withContext list
+    fun getProjectDocumentChangeFlow(documentId: String) : Flow<Project?>?{
+        val db =
+            databaseResources.databases[databaseResources.projectDatabaseName]?.database
+        db?.let { database ->
+            return database.documentChangeFlow(documentId)
+                .map { dc -> mapDocumentChangeToProject(dc) }
+                .flowOn(Dispatchers.IO)
         }
+        return null
+    }
+
+    private fun mapDocumentChangeToProject(documentChange: DocumentChange) : Project?{
+        var project: Project? = null
+        val db =
+            databaseResources.databases[databaseResources.projectDatabaseName]?.database
+        db?.let { database ->
+            val doc = database.getDocument(documentChange.documentID)
+            doc?.let { document ->
+                project = Gson().fromJson(document.toJSON(), Project::class.java)
+            }
+        }
+        return project
+    }
+
+    override fun getProjectsFlow(): Flow<List<Project>>? {
+        try {
+            val db =
+                databaseResources.databases[databaseResources.projectDatabaseName]?.database
+            db?.let { database ->
+                val query = database.createQuery("SELECT * FROM project AS item WHERE type = \"project\"")
+                val flow = query
+                    .queryChangeFlow()
+                    .map{ qc -> mapQueryChangeToProjects(qc)}
+                    .flowOn(Dispatchers.IO)
+                query.execute()
+                return flow
+            }
+        } catch (e: Exception){
+            android.util.Log.e(e.message, e.stackTraceToString())
+        }
+        return null
+    }
+
+    private fun mapQueryChangeToProjects(queryChange: QueryChange) : List<Project>{
+        val projects = mutableListOf<Project>()
+        queryChange.results?.let { results ->
+            results.forEach() { result ->
+                projects.add(Gson().fromJson(result.toJSON(), ProjectDTO::class.java).item)
+            }
+        }
+        return projects
     }
 
     override suspend fun saveProject(project: Project) {
@@ -126,32 +158,12 @@ class ProjectRepositoryDb(private var context: Context) : ProjectRepository {
         }
     }
 
-    override suspend fun getLocations(): List<Location> {
-        return withContext(Dispatchers.IO) {
-            val locationResults = ArrayList<Location>()
-            try {
-                val db =
-                    databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                db?.let { database ->
-                    val query = database.createQuery("SELECT * FROM project AS location WHERE type = \"location\"")
-                    query.execute().forEach { location ->
-                        val json = location.toJSON()
-                        val locationWrapper = Gson().fromJson(json, LocationWrapper::class.java)
-                        locationResults.add(locationWrapper.location)
-                   }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e(e.message, e.stackTraceToString())
-            }
-            return@withContext locationResults
-        }
-    }
+
 
     override suspend fun initializeDatabase() {
         return withContext(Dispatchers.IO) {
             try {
-                val dbConfig = DatabaseConfiguration()
-                dbConfig.directory = context.filesDir.toString()
+                val dbConfig = DatabaseConfigurationFactory.create(context.filesDir.toString())
 
                 //if databases don't exist create them from embedded asset
                 if (!Database.exists(databaseResources.projectDatabaseName, context.filesDir)) {
@@ -162,12 +174,7 @@ class ProjectRepositoryDb(private var context: Context) : ProjectRepository {
                     unzip("locations.zip", locationDbPath)
 
                     //copy the location database to the project database
-                    val locationDbFile = File(
-                        String.format(
-                            "%s/%s",
-                            context.filesDir,
-                            (databaseResources.locationDatabase + ".cblite2")
-                        ))
+                    val locationDbFile = File( String.format( "%s/%s", context.filesDir, (databaseResources.locationDatabase + ".cblite2") ))
                     Database.copy(locationDbFile, databaseResources.projectDatabaseName, dbConfig)
                 }
                 //get database and store pointer for later use

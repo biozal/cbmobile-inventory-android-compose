@@ -9,9 +9,6 @@ import kotlinx.coroutines.flow.Flow
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectRepositoryMock : ProjectRepository {
 
-    override val documentChanges: Flow<DocumentChange>?
-        get() = TODO("Not yet implemented")
-
     override suspend fun completeProject(projectId: String) {
         TODO("Not yet implemented")
     }
@@ -19,6 +16,11 @@ class ProjectRepositoryMock : ProjectRepository {
     override suspend fun saveProject(project: Project) {
         TODO("Not yet implemented")
     }
+
+    override fun getProjectsFlow(): Flow<List<Project>>? {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getProject(projectId: String): Project {
         TODO("Not yet implemented")
     }
@@ -27,16 +29,7 @@ class ProjectRepositoryMock : ProjectRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getProjects(): List<Project> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getLocations(): List<Location> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun initializeDatabase() {
         TODO("Not yet implemented")
     }
-
 }

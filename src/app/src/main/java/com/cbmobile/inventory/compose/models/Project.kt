@@ -2,7 +2,7 @@ package com.cbmobile.inventory.compose.models
 
 import java.util.*
 
-class ProjectWrapper(override var item: Project) : Wrapper<Project> {
+class ProjectDTO(override var item: Project) : DTO<Project> {
 }
 
 data class Project (
@@ -12,5 +12,6 @@ data class Project (
     var isComplete: Boolean = false,
     var type: String = "project",
     var dueDate: Date? = null,
-    var locations: List<Location>? = null
+    var location: Location? = null
 )
+

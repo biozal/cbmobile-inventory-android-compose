@@ -2,7 +2,7 @@ package com.cbmobile.inventory.compose.models
 import androidx.annotation.Keep
 import java.util.*
 
-data class LocationWrapper(
+data class LocationDTO(
     val location: Location)
 
 data class Location (
