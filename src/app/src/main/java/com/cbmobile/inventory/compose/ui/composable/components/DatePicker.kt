@@ -7,7 +7,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -16,12 +15,10 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
@@ -94,14 +91,5 @@ fun showDatePickerDialog(activity: Context,
 
     startDate.set(Calendar.DAY_OF_MONTH, 1)
     datePickerDialog.datePicker.minDate = startDate.timeInMillis
-    //datePickerDialog.datePicker.maxDate = Calendar.getInstance().timeInMillis
     datePickerDialog.show()
-}
-
-fun getFormattedDate(date: Date?, format: String): String {
-    date?.let { formattedDate ->
-        val formatter = SimpleDateFormat(format, Locale.getDefault())
-        return formatter.format(formattedDate)
-    }
-    return ""
 }
