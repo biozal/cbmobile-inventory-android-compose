@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.net.URI
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -48,7 +49,7 @@ class ProjectRepositoryDb(var context: Context) : ProjectRepository {
             } catch (e: Exception) {
                 android.util.Log.e(e.message, e.stackTraceToString())
             }
-            return@withContext Project(UUID.randomUUID().toString())
+            return@withContext Project(projectId = projectId, createdOn = Date(), modifiedOn = Date())
         }
     }
 

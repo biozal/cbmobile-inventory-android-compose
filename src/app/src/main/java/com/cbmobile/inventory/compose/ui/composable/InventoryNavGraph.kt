@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cbmobile.inventory.compose.data.AppContainer
+import com.cbmobile.inventory.compose.models.UserProfile
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditEditorScreen
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditListScreen
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectListScreen
@@ -41,6 +42,7 @@ object MainDestinations {
 @OptIn(InternalCoroutinesApi::class)
 @Composable
 fun InventoryNavGraph(
+    currentUser: UserProfile,
     appContainer: AppContainer,
     navController: NavHostController = rememberNavController(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
@@ -66,10 +68,11 @@ fun InventoryNavGraph(
        }
        composable(MainDestinations.PROJECT_EDITOR_ROUTE_PATH){ backstackEntry ->
             ProjectEditorScreen(
-                backstackEntry.arguments?.getString(MainDestinations.PROJECT_EDITOR_KEY_ID),
-                appContainer.projectRepository,
-                appContainer.locationRepository,
-                actions.upPress,
+                currentUser =  currentUser,
+                projectJson = backstackEntry.arguments?.getString(MainDestinations.PROJECT_EDITOR_KEY_ID),
+                projectRepository = appContainer.projectRepository,
+                locationRepository = appContainer.locationRepository,
+                navigateUp = actions.upPress,
                 scaffoldState = scaffoldState,
                 lifecycleScope = lifecycleScope
             )

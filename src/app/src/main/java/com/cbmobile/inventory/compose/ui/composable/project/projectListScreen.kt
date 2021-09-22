@@ -4,11 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,7 +37,7 @@ fun ProjectListScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     snackBarCoroutineScope: CoroutineScope) {
 
-    val viewModel = ProjectListViewModel(projectRepository)
+    val viewModel = ProjectListViewModel(projectRepository = projectRepository)
     val projects = viewModel.projects.observeAsState(ArrayList<Project>())
     val isLoading = viewModel.isLoading.observeAsState(true)
 
@@ -122,13 +123,12 @@ fun ProjectCard(project: Project,
     ) {
         Column(
             modifier = Modifier
-                .height(160.dp)
+                .height(200.dp)
                 .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth()
-            )
-            {
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically){
                 Text(
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
@@ -170,6 +170,35 @@ fun ProjectCard(project: Project,
                         }
                     }
                 }
+            }
+            project.location?.name?.let {
+                Row(modifier = Modifier
+                    .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                    Icon(
+                        Icons.Filled.LocationOn,
+                        contentDescription = "",
+                        modifier = Modifier.size(12.dp),
+                        tint = Color.DarkGray)
+
+                    Text(modifier = Modifier.padding(start = 6.dp),
+                        text = it,
+                        style = MaterialTheme.typography.caption,
+                        color = Color.LightGray
+                    )
+                }
+            }
+            Row(modifier = Modifier
+                .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                Icon(
+                    Icons.Default.CalendarToday,
+                    contentDescription = "",
+                    modifier = Modifier.size(12.dp),
+                    tint = if(project.isOverDue()) Color.Red else Color.DarkGray)
+                Text(modifier = Modifier.padding(start = 6.dp),
+                    text = project.getDueDateString(),
+                    style = MaterialTheme.typography.caption,
+                    color = if (project.isOverDue()) Color.Red else Color.LightGray
+                )
             }
             Row( modifier = Modifier.fillMaxWidth()) {
                 Text(

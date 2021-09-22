@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cbmobile.inventory.compose.InventoryApplication
+import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.ui.composable.ui.theme.InventoryTheme
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -36,7 +37,7 @@ class MainActivity : ComponentActivity() {
                 //so we need top level scaffold.  An event to open the drawer is passed
                 //to each screen that needs it.
                 val scaffoldState = rememberScaffoldState()
-
+                val currentUser = InventoryDatabase.getInstance(this.applicationContext).loggedInUser!!
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route ?: MainDestinations.HOME_ROUTE
                 val snackBarCoroutineScope = rememberCoroutineScope()
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
                             scaffoldState.snackbarHostState
                         }) {
                         InventoryNavGraph(
+                            currentUser = currentUser,
                             appContainer = appContainer,
                             navController = navController,
                             scaffoldState = scaffoldState,

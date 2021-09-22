@@ -17,6 +17,7 @@ import com.cbmobile.inventory.compose.data.location.LocationRepository
 import com.cbmobile.inventory.compose.data.projects.*
 import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.Project
+import com.cbmobile.inventory.compose.models.UserProfile
 import com.cbmobile.inventory.compose.ui.composable.components.DatePicker
 import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
 import com.cbmobile.inventory.compose.ui.composable.components.LocationListSelection
@@ -24,6 +25,7 @@ import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 
 @Composable
 fun ProjectEditorScreen(
+    currentUser: UserProfile,
     projectJson: String?,
     projectRepository: ProjectRepository,
     locationRepository: LocationRepository,
@@ -31,7 +33,11 @@ fun ProjectEditorScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     lifecycleScope: LifecycleCoroutineScope) {
 
-    val viewModel = ProjectViewModel(projectJson, projectRepository, locationRepository)
+    val viewModel = ProjectViewModel(
+                        currentUser = currentUser,
+                        projectJson = projectJson,
+                        projectRepository = projectRepository,
+                        locationRepository = locationRepository)
 
     InventoryTheme {
         // A surface container using the 'background' color from the theme
@@ -116,50 +122,6 @@ fun ProjectEditor(
                 })
                 {
                     Text("Save", style = MaterialTheme.typography.h5)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LocationSelection(
-    project: Project,
-    locations: List<Location>,
-    onLocationChanged: (Location) -> Unit)
-{
-    var expanded by remember { mutableStateOf(false) }
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .wrapContentWidth(Alignment.Start)
-                .padding(top = 10.dp),
-            text = "Location: " + project.location?.name
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterVertically)
-                .wrapContentSize(Alignment.TopEnd)
-        )
-        {
-            IconButton(onClick = { expanded = true }) {
-                Icon(Icons.Default.AddLocation, contentDescription = "Localized description")
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false })
-            {
-                locations?.forEach { location ->
-                    DropdownMenuItem(onClick = {
-                        onLocationChanged(location)
-                        expanded = false
-                    }) {
-                        Text(location.name)
-                    }
                 }
             }
         }

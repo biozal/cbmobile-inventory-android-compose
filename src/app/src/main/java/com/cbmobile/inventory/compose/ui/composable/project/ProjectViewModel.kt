@@ -8,13 +8,15 @@ import com.cbmobile.inventory.compose.data.location.LocationRepository
 import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.Project
+import com.cbmobile.inventory.compose.models.UserProfile
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ProjectViewModel(private val projectJson: String?,
+class ProjectViewModel(private val currentUser: UserProfile,
+                       private val projectJson: String?,
                        private val projectRepository: ProjectRepository,
                        private val locationRepository: LocationRepository)
     : ViewModel() {
@@ -30,7 +32,11 @@ class ProjectViewModel(private val projectJson: String?,
                 locationsState.add(result)
             }
             if (projectJson == null || projectJson == "create") {
-                projectState.value = projectRepository.getProject(UUID.randomUUID().toString())
+                val project = projectRepository.getProject(UUID.randomUUID().toString())
+                project.createdBy = currentUser.username
+                project.modifiedBy = currentUser.username
+                projectState.value = project
+
             } else {
                 projectState.value = Gson().fromJson(projectJson, Project::class.java)
                 projectState.value.location?.let { location ->
@@ -81,6 +87,9 @@ class ProjectViewModel(private val projectJson: String?,
         viewModelScope.launch(Dispatchers.IO){
             projectState.value.name = projectState.value.name.trim()
             projectState.value.description = projectState.value.description.trim()
+            projectState.value.modifiedBy = currentUser.username
+            projectState.value.modifiedOn = Date()
+            //get security fields
             projectRepository.saveProject(projectState.value)
        }
     }
