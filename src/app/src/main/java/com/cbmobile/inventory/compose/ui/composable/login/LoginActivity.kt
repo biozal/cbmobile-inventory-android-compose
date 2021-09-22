@@ -29,9 +29,12 @@ class LoginActivity : ComponentActivity() {
         setContent {
             InventoryTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background,
-                        modifier = Modifier.fillMaxSize()) {
-                    Login()
+                Surface(
+                    color = MaterialTheme.colors.background,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    val viewModel = LoginViewModel(this.applicationContext)
+                    SetupLogin(viewModel = viewModel)
                 }
             }
         }
@@ -39,9 +42,27 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun Login(viewModel: LoginViewModel = LoginViewModel()) {
-    var username = viewModel.username.observeAsState("")
-    var password = viewModel.password.observeAsState("")
+fun SetupLogin(viewModel: LoginViewModel){
+    val username = viewModel.username.observeAsState("")
+    val password =  viewModel.password.observeAsState("")
+    val isError = viewModel.isError.observeAsState(false)
+
+    Login(username = username.value,
+        password = password.value,
+        isLoginError = isError.value,
+        onUsernameChanged = viewModel.onUsernameChanged,
+        onPasswordChanged = viewModel.onPasswordChanged,
+        login = viewModel::login)
+}
+
+@Composable
+fun Login(
+    username: String,
+    password: String,
+    isLoginError: Boolean,
+    onUsernameChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit,
+    login: () -> Boolean) {
     val context = LocalContext.current
 
     Column(modifier = Modifier
@@ -55,28 +76,34 @@ fun Login(viewModel: LoginViewModel = LoginViewModel()) {
             contentDescription = "Logo",
             modifier = Modifier.padding(bottom = 32.dp)
         ) 
-        OutlinedTextField(value = username.value,
-            onValueChange = { viewModel.onUsernameChanged(it) },
+        OutlinedTextField(value = username,
+            onValueChange = { onUsernameChanged(it) },
             label = { Text("username") }
         )
         OutlinedTextField(modifier =  Modifier.padding(top = 16.dp),
-            value = password.value,
-            onValueChange = { viewModel.onPasswordChanged(it) },
+            value = password,
+            onValueChange = { onPasswordChanged(it) },
             label = { Text("password")},
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
         Button(modifier = Modifier.padding(top = 32.dp),
             onClick = {
-                if (viewModel.login()){
+                if (login()){
                     context.startActivity(Intent(context, MainActivity::class.java))
-                } else {
-                    //todo-show error that they have wrong password
                 }
 
             })
         {
             Text("Login", style = MaterialTheme.typography.h5)
+        }
+        if (isLoginError) {
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
+                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colors.error,
+                text = "Error: username or password is incorrect"
+            )
         }
    }
 }
@@ -84,7 +111,17 @@ fun Login(viewModel: LoginViewModel = LoginViewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
+    val viewModel = LoginViewModel(LocalContext.current)
+    val username : String by viewModel.username.observeAsState("")
+    val password: String by viewModel.password.observeAsState("")
+    val isError: Boolean by viewModel.isError.observeAsState(false)
+
     InventoryTheme {
-        Login()
+        Login(username = username,
+            password = password,
+            isLoginError = isError,
+            onUsernameChanged = viewModel.onUsernameChanged,
+            onPasswordChanged = viewModel.onPasswordChanged,
+            login = viewModel::login)
     }
 }
