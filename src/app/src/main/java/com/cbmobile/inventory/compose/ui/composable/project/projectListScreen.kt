@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 @InternalCoroutinesApi
 @Composable
 fun ProjectListScreen(
+    openDrawer: () -> Unit,
     projectRepository: ProjectRepository,
     navigateToProjectEditor: (String) -> Unit,
     navigateToAuditListByProject: (String) -> Unit,
@@ -44,7 +45,7 @@ fun ProjectListScreen(
     InventoryTheme {
         // A surface container using the 'background' color from the theme
         Scaffold(scaffoldState = scaffoldState,
-            topBar = { InventoryAppBar(title = "Projects")},
+            topBar = { InventoryAppBar(title = "Projects", buttonIcon = Icons.Filled.Menu, onClicked = { openDrawer() } )},
             floatingActionButton = { AddButton(navigateToProjectEditor) })
         {
             Surface(

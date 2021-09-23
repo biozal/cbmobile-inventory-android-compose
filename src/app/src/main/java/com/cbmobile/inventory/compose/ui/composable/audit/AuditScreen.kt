@@ -2,6 +2,8 @@ package com.cbmobile.inventory.compose.ui.composable.audit
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.ui.Modifier
@@ -16,6 +18,7 @@ import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 
 @Composable
 fun AuditEditorScreen(
+    openDrawer: () -> Unit,
     auditJson: String?,
     auditRepository: AuditRepository,
     navigateUp: () -> Unit,
@@ -24,7 +27,7 @@ fun AuditEditorScreen(
     val viewModel = AuditViewModel(auditJson, auditRepository)
     InventoryTheme {
         // A surface container using the 'background' color from the theme
-        Scaffold(topBar = { InventoryAppBar(title = "Audit Editor") })
+        Scaffold(topBar = { InventoryAppBar(title = "Audit Editor", buttonIcon = Icons.Filled.Menu, onClicked = { openDrawer() }) })
         {
             Surface(
                 color = MaterialTheme.colors.background,

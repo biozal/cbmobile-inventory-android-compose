@@ -1,19 +1,25 @@
 package com.cbmobile.inventory.compose.ui.composable
 
+import android.content.Intent
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cbmobile.inventory.compose.data.AppContainer
+import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.models.UserProfile
+import com.cbmobile.inventory.compose.ui.composable.Developer.DeveloperScreen
+import com.cbmobile.inventory.compose.ui.composable.Replication.ReplicationScreen
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditEditorScreen
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditListScreen
+import com.cbmobile.inventory.compose.ui.composable.login.LoginActivity
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectListScreen
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectEditorScreen
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +30,9 @@ import kotlinx.coroutines.InternalCoroutinesApi
  */
 object MainDestinations {
     const val HOME_ROUTE = "projects"
+    const val REPLICATION_ROUTE = "replication"
+    const val DEVELOPER_ROUTE = "developer"
+    const val LOGOUT_ROUTE = "logout"
     const val PROJECT_EDITOR_ROUTE_PATH = "projectEditor/{project}"
     const val PROJECT_EDITOR_ROUTE = "projectEditor"
     const val AUDIT_LIST_ROUTE_PATH = "auditList/{project}"
@@ -32,22 +41,19 @@ object MainDestinations {
     const val AUDIT_EDITOR_ROUTE = "auditEditor"
     const val PROJECT_EDITOR_KEY_ID = "project"
     const val AUDIT_EDITOR_KEY_ID = "audit"
-    const val SYNC_MENU = "syncMenu"
-    const val SYNC_SERVER_ROUTE = "syncServer"
-    const val SYNC_SERVER_STATUS_ROUTE = "syncServerSTATUS"
-    const val SYNC_PTP_ROUTE = "syncPTP"
-    const val SYNC_PTP_STATUS_ROUTE = "syncPTPSTATUS"
 }
 
 @OptIn(InternalCoroutinesApi::class)
 @Composable
 fun InventoryNavGraph(
+    openDrawer: () -> Unit,
+    inventoryDatabase: InventoryDatabase,
     currentUser: UserProfile,
     appContainer: AppContainer,
     navController: NavHostController = rememberNavController(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     lifecycleScope: LifecycleCoroutineScope,
-    snackBarCoroutineScope: CoroutineScope,
+    scope: CoroutineScope,
     startDestination: String = MainDestinations.HOME_ROUTE )
 {
 
@@ -59,15 +65,17 @@ fun InventoryNavGraph(
         startDestination = startDestination){
        composable(MainDestinations.HOME_ROUTE) {
            ProjectListScreen(
-               appContainer.projectRepository,
-               actions.navigateToProjectEditor,
-               actions.navigateToAuditListByProject,
+               openDrawer = openDrawer,
+               projectRepository =  appContainer.projectRepository,
+               navigateToProjectEditor =  actions.navigateToProjectEditor,
+               navigateToAuditListByProject =  actions.navigateToAuditListByProject,
                scaffoldState =  scaffoldState,
-               snackBarCoroutineScope = snackBarCoroutineScope
+               snackBarCoroutineScope = scope
            )
        }
        composable(MainDestinations.PROJECT_EDITOR_ROUTE_PATH){ backstackEntry ->
             ProjectEditorScreen(
+                openDrawer = openDrawer,
                 currentUser =  currentUser,
                 projectJson = backstackEntry.arguments?.getString(MainDestinations.PROJECT_EDITOR_KEY_ID),
                 projectRepository = appContainer.projectRepository,
@@ -79,6 +87,7 @@ fun InventoryNavGraph(
         }
         composable(MainDestinations.AUDIT_LIST_ROUTE_PATH){ backstackEntry ->
             AuditListScreen(
+                openDrawer = openDrawer,
                 backstackEntry.arguments?.getString(MainDestinations.PROJECT_EDITOR_KEY_ID),
                 appContainer.auditRepository,
                 appContainer.projectRepository,
@@ -88,11 +97,32 @@ fun InventoryNavGraph(
         }
         composable(MainDestinations.AUDIT_EDITOR_ROUTE_PATH){ backstackEntry ->
             AuditEditorScreen(
+                openDrawer = openDrawer,
                 backstackEntry.arguments?.getString(MainDestinations.AUDIT_EDITOR_KEY_ID ),
                 appContainer.auditRepository,
                 actions.upPress,
                 lifecycleScope = lifecycleScope
             )
+        }
+        composable(MainDestinations.DEVELOPER_ROUTE){
+            DeveloperScreen(
+                openDrawer = openDrawer,
+                currentUser =  currentUser,
+                scaffoldState = scaffoldState,
+                lifecycleScope = lifecycleScope
+            )
+        }
+        composable(MainDestinations.REPLICATION_ROUTE){
+            ReplicationScreen(
+                openDrawer = openDrawer,
+                scaffoldState = scaffoldState,
+                lifecycleScope = lifecycleScope
+            )
+        }
+        composable(MainDestinations.LOGOUT_ROUTE){
+            val context = LocalContext.current
+            inventoryDatabase.loggedInUser = null
+            context.startActivity(Intent(context, LoginActivity::class.java))
         }
     }
 }
