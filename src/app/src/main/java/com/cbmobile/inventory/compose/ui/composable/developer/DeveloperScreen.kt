@@ -1,4 +1,4 @@
-package com.cbmobile.inventory.compose.ui.composable.Developer
+package com.cbmobile.inventory.compose.ui.composable.developer
 
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,8 +29,8 @@ fun DeveloperScreen(
             topBar = {
                 InventoryAppBar(
                     title = "Developer Options",
-                    buttonIcon = Icons.Filled.Menu,
-                    onClicked = { openDrawer() })
+                    navigationIcon = Icons.Filled.Menu,
+                    navigationOnClick = { openDrawer() })
             })
         {
             Surface(

@@ -1,5 +1,6 @@
-package com.cbmobile.inventory.compose.ui.composable.Replication
+package com.cbmobile.inventory.compose.ui.composable.replication
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,6 +20,7 @@ import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 @Composable
 fun ReplicationScreen(
     openDrawer: () -> Unit,
+    replicationConfigNav: () -> Unit,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     lifecycleScope: LifecycleCoroutineScope)
 {
@@ -27,8 +30,19 @@ fun ReplicationScreen(
             topBar = {
                 InventoryAppBar(
                     title = "Replication Sync",
-                    buttonIcon = Icons.Filled.Menu,
-                    onClicked = { openDrawer() })
+                    navigationIcon = Icons.Filled.Menu,
+                    navigationOnClick = { openDrawer() },
+                    menuAction = {
+                        IconButton(onClick = { replicationConfigNav() }) {
+                            Icon(
+                                imageVector = Icons.Filled.Settings,
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                            )
+                        }
+                    }
+                )
             })
         {
             Surface(

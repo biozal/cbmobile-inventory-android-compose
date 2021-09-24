@@ -15,13 +15,14 @@ import androidx.navigation.compose.rememberNavController
 import com.cbmobile.inventory.compose.data.AppContainer
 import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.models.UserProfile
-import com.cbmobile.inventory.compose.ui.composable.Developer.DeveloperScreen
-import com.cbmobile.inventory.compose.ui.composable.Replication.ReplicationScreen
+import com.cbmobile.inventory.compose.ui.composable.developer.DeveloperScreen
+import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationScreen
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditEditorScreen
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditListScreen
 import com.cbmobile.inventory.compose.ui.composable.login.LoginActivity
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectListScreen
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectEditorScreen
+import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationConfigScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -31,6 +32,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 object MainDestinations {
     const val HOME_ROUTE = "projects"
     const val REPLICATION_ROUTE = "replication"
+    const val REPLICATION_SETTINGS_ROUTE = "replicationConfig"
     const val DEVELOPER_ROUTE = "developer"
     const val LOGOUT_ROUTE = "logout"
     const val PROJECT_EDITOR_ROUTE_PATH = "projectEditor/{project}"
@@ -115,8 +117,15 @@ fun InventoryNavGraph(
         composable(MainDestinations.REPLICATION_ROUTE){
             ReplicationScreen(
                 openDrawer = openDrawer,
+                replicationConfigNav = actions.navigateToReplicationConfig,
                 scaffoldState = scaffoldState,
                 lifecycleScope = lifecycleScope
+            )
+        }
+        composable(MainDestinations.REPLICATION_SETTINGS_ROUTE){
+            ReplicationConfigScreen(
+                navigateUp = actions.upPress,
+                scaffoldState = scaffoldState
             )
         }
         composable(MainDestinations.LOGOUT_ROUTE){
@@ -143,7 +152,13 @@ class MainActions(navController: NavHostController) {
        navController.navigate("${MainDestinations.AUDIT_EDITOR_ROUTE}/$auditJson")
     }
 
+    val navigateToReplicationConfig: () -> Unit = {
+        navController.navigate("${MainDestinations.REPLICATION_SETTINGS_ROUTE}")
+    }
+
     val upPress: () -> Unit = {
         navController.popBackStack()
     }
+
+
 }

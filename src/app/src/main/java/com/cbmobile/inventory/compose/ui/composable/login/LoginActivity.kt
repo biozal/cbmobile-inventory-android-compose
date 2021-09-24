@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -13,15 +14,19 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.cbmobile.inventory.compose.R
 import com.cbmobile.inventory.compose.ui.composable.MainActivity
 
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import dagger.hilt.android.AndroidEntryPoint
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,20 +77,29 @@ fun Login(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center){
         Image (
-            painter = painterResource(id = R.drawable.acmelogo),
+            rememberDrawablePainter(drawable = ContextCompat.getDrawable(context, R.drawable.acmelogo)),
             contentDescription = "Logo",
             modifier = Modifier.padding(bottom = 32.dp)
         ) 
         OutlinedTextField(value = username,
             onValueChange = { onUsernameChanged(it) },
-            label = { Text("username") }
+            label = { Text("username") },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                capitalization = KeyboardCapitalization.None,
+                autoCorrect = false,
+                keyboardType = KeyboardType.Email)
         )
         OutlinedTextField(modifier =  Modifier.padding(top = 16.dp),
             value = password,
             onValueChange = { onPasswordChanged(it) },
             label = { Text("password")},
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = {
+                if (login()){
+                    context.startActivity(Intent(context, MainActivity::class.java))
+                }
+            })
         )
         Button(modifier = Modifier.padding(top = 32.dp),
             onClick = {
