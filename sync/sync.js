@@ -1,5 +1,4 @@
 function sync(doc, oldDoc) {
-    
     /* Data Validation */
     validateNotEmpty("type", doc.type);
 
@@ -62,6 +61,4 @@ function validateReadOnly(name, value, oldValue) {
   if (value != oldValue) {
     throw({forbidden: name + " is read-only."});
   }
-}
-
 }

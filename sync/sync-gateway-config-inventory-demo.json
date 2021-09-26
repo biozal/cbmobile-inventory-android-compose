@@ -98,11 +98,6 @@
     return ((oldDoc == false) || (oldDoc == null || oldDoc._deleted) && !isDelete());
   }
 
-  // Check if this is a document update
-  function isUpdate() {
-    return (!isCreate() && !isDelete());
-  }
-
   // Check if this is a document delete
   function isDelete() {
     return (doc._deleted == true);
@@ -114,14 +109,6 @@
       throw({forbidden: key + " is not provided."});
     }
   }
-
-  // Verify that specified property value has not changed during update
-  function validateReadOnly(name, value, oldValue) {
-    if (value != oldValue) {
-      throw({forbidden: name + " is read-only."});
-    }
-  }
-  
 }
       `
     }
