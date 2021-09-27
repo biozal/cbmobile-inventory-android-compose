@@ -1,5 +1,5 @@
 package com.cbmobile.inventory.compose.models
 
-interface DTO<T> {
+interface ModelDTO<T> {
     var item: T
 }

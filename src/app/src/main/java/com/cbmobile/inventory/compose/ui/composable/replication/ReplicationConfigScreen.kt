@@ -12,19 +12,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbmobile.inventory.compose.data.replication.ReplicationServiceMock
 import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
 import com.cbmobile.inventory.compose.ui.composable.components.LabelSwitchRow
 import com.cbmobile.inventory.compose.ui.composable.components.RowListSelection
-import com.cbmobile.inventory.compose.ui.composable.components.RowSaveButton
+import com.cbmobile.inventory.compose.ui.composable.components.RowButton
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 
 @Composable
 fun ReplicationConfigScreen(
+    viewModel: ReplicationConfigViewModel,
     navigateUp: () -> Unit,
     scaffoldState: ScaffoldState = rememberScaffoldState())
 {
-    val viewModel = ReplicationConfigViewModel()
-
     InventoryTheme {
         // A surface container using the 'background' color from the theme
         Scaffold(scaffoldState = scaffoldState,
@@ -54,7 +54,7 @@ fun ReplicationConfigScreen(
                     onReplicatorTypeChanged = viewModel.onReplicatorTypeChanged,
                     username = viewModel.username,
                     password = viewModel.password,
-                    onSave = viewModel::Save,
+                    onSave = viewModel::save,
                     navigateUp = navigateUp)
             }
         }
@@ -173,12 +173,12 @@ fun ReplicationConfigOptions(
             DividerRow()
         }
         item() {
-            RowSaveButton ( onClick = {
+            RowButton ( onClick = {
                 //save and head back
                 onSave()
                 //navigate back
                 navigateUp()
-            })
+            }, displayText = "Save")
         }
     }
 }
@@ -193,8 +193,9 @@ fun DividerRow() {
 @Preview(showBackground = true)
 @Composable
 fun ReplicationConfigScreenPreview(){
+    val viewModel = ReplicationConfigViewModel(ReplicationServiceMock())
     InventoryTheme {
-        ReplicationConfigScreen(navigateUp = { })
+        ReplicationConfigScreen(viewModel = viewModel, navigateUp = { })
 
     }
 }

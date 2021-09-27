@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,9 +21,12 @@ import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationScree
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditEditorScreen
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditListScreen
 import com.cbmobile.inventory.compose.ui.composable.login.LoginActivity
+import com.cbmobile.inventory.compose.ui.composable.login.LoginViewModel
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectListScreen
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectEditorScreen
 import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationConfigScreen
+import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationConfigViewModel
+import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -58,17 +62,15 @@ fun InventoryNavGraph(
     scope: CoroutineScope,
     startDestination: String = MainDestinations.HOME_ROUTE )
 {
-
     val actions = remember(navController) { MainActions(navController) }
-    val coroutineScope = rememberCoroutineScope()
 
     NavHost(
         navController = navController,
         startDestination = startDestination){
        composable(MainDestinations.HOME_ROUTE) {
            ProjectListScreen(
+               viewModel = appContainer.projectListViewModel,
                openDrawer = openDrawer,
-               projectRepository =  appContainer.projectRepository,
                navigateToProjectEditor =  actions.navigateToProjectEditor,
                navigateToAuditListByProject =  actions.navigateToAuditListByProject,
                scaffoldState =  scaffoldState,
@@ -108,22 +110,23 @@ fun InventoryNavGraph(
         }
         composable(MainDestinations.DEVELOPER_ROUTE){
             DeveloperScreen(
+                viewModel = appContainer.developerViewModel,
                 openDrawer = openDrawer,
                 currentUser =  currentUser,
                 scaffoldState = scaffoldState,
-                lifecycleScope = lifecycleScope
             )
         }
         composable(MainDestinations.REPLICATION_ROUTE){
             ReplicationScreen(
+                viewModel = appContainer.replicationViewModel,
                 openDrawer = openDrawer,
                 replicationConfigNav = actions.navigateToReplicationConfig,
-                scaffoldState = scaffoldState,
-                lifecycleScope = lifecycleScope
+                scaffoldState = scaffoldState
             )
         }
         composable(MainDestinations.REPLICATION_SETTINGS_ROUTE){
             ReplicationConfigScreen(
+                viewModel = appContainer.replicationConfigViewModel,
                 navigateUp = actions.upPress,
                 scaffoldState = scaffoldState
             )

@@ -32,4 +32,12 @@ class ProjectRepositoryMock : ProjectRepository {
     override suspend fun initializeDatabase() {
         TODO("Not yet implemented")
     }
+
+    override suspend fun deleteDatabase() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun loadSampleData() {
+        TODO("Not yet implemented")
+    }
 }

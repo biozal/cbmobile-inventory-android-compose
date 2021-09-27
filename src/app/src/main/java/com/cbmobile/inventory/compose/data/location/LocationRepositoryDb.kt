@@ -19,7 +19,7 @@ class LocationRepositoryDb(context: Context) : LocationRepository {
                 val db =
                     databaseResources.databases[databaseResources.projectDatabaseName]?.database
                 db?.let { database ->
-                    val query = database.createQuery("SELECT * FROM project AS location WHERE type = \"location\"")
+                    val query = database.createQuery("SELECT * FROM _ AS location WHERE type = \"location\"")
                     query.execute().forEach { location ->
                         val json = location.toJSON()
                         val locationWrapper = Gson().fromJson(json, LocationDTO::class.java)

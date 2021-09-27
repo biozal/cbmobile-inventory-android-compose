@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.cbmobile.inventory.compose.InventoryApplication
 import com.cbmobile.inventory.compose.R
 import com.cbmobile.inventory.compose.ui.composable.MainActivity
 
@@ -31,6 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val appContainer = (application as InventoryApplication).container
         setContent {
             InventoryTheme {
                 // A surface container using the 'background' color from the theme
@@ -38,7 +40,7 @@ class LoginActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    val viewModel = LoginViewModel(this.applicationContext)
+                    val viewModel = LoginViewModel(appContainer.authenticationService)
                     SetupLogin(viewModel = viewModel)
                 }
             }
@@ -125,17 +127,16 @@ fun Login(
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    val viewModel = LoginViewModel(LocalContext.current)
-    val username : String by viewModel.username.observeAsState("")
-    val password: String by viewModel.password.observeAsState("")
-    val isError: Boolean by viewModel.isError.observeAsState(false)
+    val username : String = ""
+    val password: String = ""
+    val isError: Boolean = false
 
     InventoryTheme {
         Login(username = username,
             password = password,
             isLoginError = isError,
-            onUsernameChanged = viewModel.onUsernameChanged,
-            onPasswordChanged = viewModel.onPasswordChanged,
-            login = viewModel::login)
+            onUsernameChanged = { },
+            onPasswordChanged = { },
+            login = { false } )
     }
 }

@@ -59,7 +59,7 @@ fun Drawer(
                             .fillMaxWidth()
                             .padding(start = 16.dp),
                         text = "Inventory Demo",
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.h5,
                         color = Color.White)
                 }
         }
@@ -82,7 +82,7 @@ fun Drawer(
                     )
                     Text(
                         text = menuItem.title,
-                        style = MaterialTheme.typography.subtitle1,
+                        style = MaterialTheme.typography.h6,
                         modifier = Modifier.padding(start = 12.dp)
                     )
                 }

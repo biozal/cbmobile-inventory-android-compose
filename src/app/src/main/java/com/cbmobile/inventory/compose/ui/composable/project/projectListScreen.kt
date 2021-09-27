@@ -30,14 +30,13 @@ import kotlinx.coroutines.launch
 @InternalCoroutinesApi
 @Composable
 fun ProjectListScreen(
+    viewModel: ProjectListViewModel,
     openDrawer: () -> Unit,
-    projectRepository: ProjectRepository,
     navigateToProjectEditor: (String) -> Unit,
     navigateToAuditListByProject: (String) -> Unit,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     snackBarCoroutineScope: CoroutineScope) {
 
-    val viewModel = ProjectListViewModel(projectRepository = projectRepository)
     val projects = viewModel.projects.observeAsState(ArrayList<Project>())
     val isLoading = viewModel.isLoading.observeAsState(true)
 
@@ -197,6 +196,19 @@ fun ProjectCard(project: Project,
                     tint = if(project.isOverDue()) Color.Red else MaterialTheme.colors.onSurface)
                 Text(modifier = Modifier.padding(start = 6.dp),
                     text = project.getDueDateString(),
+                    style = MaterialTheme.typography.caption,
+                    color = if (project.isOverDue()) Color.Red else MaterialTheme.colors.onSurface
+                )
+            }
+            Row(modifier = Modifier
+                .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                Icon(
+                    Icons.Default.Group,
+                    contentDescription = "",
+                    modifier = Modifier.size(12.dp),
+                    tint = if(project.isOverDue()) Color.Red else MaterialTheme.colors.onSurface)
+                Text(modifier = Modifier.padding(start = 6.dp),
+                    text = project.team,
                     style = MaterialTheme.typography.caption,
                     color = if (project.isOverDue()) Color.Red else MaterialTheme.colors.onSurface
                 )

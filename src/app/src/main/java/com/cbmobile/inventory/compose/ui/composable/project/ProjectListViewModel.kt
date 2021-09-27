@@ -29,12 +29,7 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
     init {
         viewModelScope.launch {
             projectRepository.initializeDatabase()
-            val flow = projectRepository.getProjectsFlow()
-            flow?.let { f ->
-                f.collect { projectResults ->
-                    _projects.postValue(projectResults)
-                }
-            }
+            setupFlow()
         }
     }
 
@@ -49,4 +44,20 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
         }
         didDelete
     }
+
+   suspend fun deleteProjects(){
+       viewModelScope.launch {
+           _projects.postValue(mutableListOf<Project>())
+           setupFlow()
+       }
+   }
+
+   private suspend fun setupFlow(){
+       val flow = projectRepository.getProjectsFlow()
+       flow?.let { f ->
+           f.collect { projectResults ->
+               _projects.postValue(projectResults)
+           }
+       }
+   }
 }

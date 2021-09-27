@@ -13,7 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun RowSaveButton(onClick: () -> Unit)
+fun RowButton(onClick: () -> Unit,
+              displayText: String)
 {
     Column(
         modifier =
@@ -28,7 +29,7 @@ fun RowSaveButton(onClick: () -> Unit)
                     onClick()
                 })
         {
-            Text("Save", style = MaterialTheme.typography.h5)
+            Text(displayText, style = MaterialTheme.typography.h5)
         }
     }
 }
