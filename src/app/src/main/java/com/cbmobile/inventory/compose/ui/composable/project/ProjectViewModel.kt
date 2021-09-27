@@ -35,6 +35,7 @@ class ProjectViewModel(private val currentUser: UserProfile,
                 val project = projectRepository.getProject(UUID.randomUUID().toString())
                 project.createdBy = currentUser.username
                 project.modifiedBy = currentUser.username
+                project.team = currentUser.team
                 projectState.value = project
 
             } else {

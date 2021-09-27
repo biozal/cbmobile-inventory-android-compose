@@ -9,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,20 +30,20 @@ import kotlinx.coroutines.launch
 @InternalCoroutinesApi
 @Composable
 fun ProjectListScreen(
-    projectRepository: ProjectRepository,
+    viewModel: ProjectListViewModel,
+    openDrawer: () -> Unit,
     navigateToProjectEditor: (String) -> Unit,
     navigateToAuditListByProject: (String) -> Unit,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     snackBarCoroutineScope: CoroutineScope) {
 
-    val viewModel = ProjectListViewModel(projectRepository = projectRepository)
     val projects = viewModel.projects.observeAsState(ArrayList<Project>())
     val isLoading = viewModel.isLoading.observeAsState(true)
 
     InventoryTheme {
         // A surface container using the 'background' color from the theme
         Scaffold(scaffoldState = scaffoldState,
-            topBar = { InventoryAppBar(title = "Projects")},
+            topBar = { InventoryAppBar(title = "Projects", navigationIcon = Icons.Filled.Menu, navigationOnClick = { openDrawer() } )},
             floatingActionButton = { AddButton(navigateToProjectEditor) })
         {
             Surface(
@@ -135,7 +134,8 @@ fun ProjectCard(project: Project,
                         .wrapContentWidth(Alignment.Start)
                         .padding(top = 10.dp),
                     text = project.name,
-                    style = MaterialTheme.typography.h6
+                    style = MaterialTheme.typography.h6,
+                    color = MaterialTheme.colors.onSurface
                 )
                 Box(
                     modifier = Modifier
@@ -178,12 +178,12 @@ fun ProjectCard(project: Project,
                         Icons.Filled.LocationOn,
                         contentDescription = "",
                         modifier = Modifier.size(12.dp),
-                        tint = Color.DarkGray)
+                        tint = MaterialTheme.colors.onSurface)
 
                     Text(modifier = Modifier.padding(start = 6.dp),
                         text = it,
                         style = MaterialTheme.typography.caption,
-                        color = Color.LightGray
+                        color = MaterialTheme.colors.onSurface
                     )
                 }
             }
@@ -193,11 +193,24 @@ fun ProjectCard(project: Project,
                     Icons.Default.CalendarToday,
                     contentDescription = "",
                     modifier = Modifier.size(12.dp),
-                    tint = if(project.isOverDue()) Color.Red else Color.DarkGray)
+                    tint = if(project.isOverDue()) Color.Red else MaterialTheme.colors.onSurface)
                 Text(modifier = Modifier.padding(start = 6.dp),
                     text = project.getDueDateString(),
                     style = MaterialTheme.typography.caption,
-                    color = if (project.isOverDue()) Color.Red else Color.LightGray
+                    color = if (project.isOverDue()) Color.Red else MaterialTheme.colors.onSurface
+                )
+            }
+            Row(modifier = Modifier
+                .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                Icon(
+                    Icons.Default.Group,
+                    contentDescription = "",
+                    modifier = Modifier.size(12.dp),
+                    tint = if(project.isOverDue()) Color.Red else MaterialTheme.colors.onSurface)
+                Text(modifier = Modifier.padding(start = 6.dp),
+                    text = project.team,
+                    style = MaterialTheme.typography.caption,
+                    color = if (project.isOverDue()) Color.Red else MaterialTheme.colors.onSurface
                 )
             }
             Row( modifier = Modifier.fillMaxWidth()) {
@@ -206,8 +219,8 @@ fun ProjectCard(project: Project,
                     modifier = Modifier.padding(top = 10.dp),
                     overflow = TextOverflow.Ellipsis,
                     text = project.description,
-                    style = MaterialTheme.typography.subtitle1,
-                    color = Color.DarkGray
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface
                 )
             }
         }

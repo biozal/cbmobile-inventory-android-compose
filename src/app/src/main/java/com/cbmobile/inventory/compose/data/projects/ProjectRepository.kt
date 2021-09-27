@@ -19,4 +19,8 @@ interface ProjectRepository {
     suspend fun completeProject(projectId: String)
 
     suspend fun initializeDatabase()
+
+    suspend fun deleteDatabase()
+
+    suspend fun loadSampleData()
 }

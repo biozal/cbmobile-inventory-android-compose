@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -87,6 +89,8 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation "androidx.constraintlayout:constraintlayout-compose:$constraints_compose_version"
 
+    //fix for android versions older than 9 that won't load images
+    implementation "com.google.accompanist:accompanist-drawablepainter:$accompanist_version"
     implementation "com.google.accompanist:accompanist-swiperefresh:$accompanist_version"
     implementation "com.google.accompanist:accompanist-insets:$accompanist_version"
     implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
@@ -105,6 +109,10 @@ dependencies {
 
     implementation "androidx.navigation:navigation-compose:$androidx_navigation_compose_version"
     implementation "com.google.android.material:material:$android_materialdesign_version"
+
+    //hilt support
+    implementation("com.google.dagger:hilt-android:$hilt_android_version")
+    kapt("com.google.dagger:hilt-android-compiler:$hilt_android_version")
 
     //couchbase lite for kotlin
     implementation"com.couchbase.lite:couchbase-lite-android:$couchbase_lite_version"
@@ -129,6 +137,11 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 }
+
+kapt {
+    correctErrorTypes true
+}
+
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {

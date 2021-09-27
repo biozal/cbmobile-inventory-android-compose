@@ -5,4 +5,5 @@ data class UserProfile(
     var password: String = "",
     var givenName: String = "",
     var surname: String = "",
+    var team: String = "",
     var isActive: Boolean = true)
