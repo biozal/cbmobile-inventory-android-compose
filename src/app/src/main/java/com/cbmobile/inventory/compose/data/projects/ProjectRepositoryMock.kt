@@ -13,6 +13,9 @@ class ProjectRepositoryMock : ProjectRepository {
         TODO("Not yet implemented")
     }
 
+    override val projectDatabaseName: String
+        get() = TODO("Not yet implemented")
+
     override suspend fun saveProject(project: Project) {
         TODO("Not yet implemented")
     }

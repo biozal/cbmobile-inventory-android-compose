@@ -1,6 +1,7 @@
 package com.cbmobile.inventory.compose.ui.composable.developer
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbmobile.inventory.compose.data.projects.ProjectRepository
@@ -16,6 +17,7 @@ class DeveloperViewModel(
 ) : ViewModel() {
 
     val logMessages = mutableStateListOf("")
+    val databaseName = mutableStateOf(projectRepository.projectDatabaseName)
 
     fun onDeleteDatabase(){
         viewModelScope.launch(Dispatchers.IO){

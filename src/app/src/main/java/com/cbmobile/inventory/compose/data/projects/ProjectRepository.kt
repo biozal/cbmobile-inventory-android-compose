@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface ProjectRepository {
 
+    val projectDatabaseName: String
+
     suspend fun saveProject(project: Project)
 
     fun getProjectsFlow(): Flow<List<Project>>?
@@ -23,4 +25,5 @@ interface ProjectRepository {
     suspend fun deleteDatabase()
 
     suspend fun loadSampleData()
+
 }

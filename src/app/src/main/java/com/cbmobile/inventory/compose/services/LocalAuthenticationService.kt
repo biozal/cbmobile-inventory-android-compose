@@ -19,7 +19,6 @@ class LocalAuthenticationService(val inventoryDatabase: InventoryDatabase) : Aut
         var filterUsers = users.filter { it.username == username && it.password == password && it.isActive }
         if (filterUsers.count() == 1){
             inventoryDatabase.loggedInUser = filterUsers[0]
-            inventoryDatabase.setTeamProjectDatabaseName(filterUsers[0].team)
             return true
         }
         return false

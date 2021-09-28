@@ -28,6 +28,7 @@ import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationConfi
 import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationConfigViewModel
 import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 
 /**
@@ -67,8 +68,8 @@ fun InventoryNavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination){
-       composable(MainDestinations.HOME_ROUTE) {
-           ProjectListScreen(
+        composable(MainDestinations.HOME_ROUTE) {
+            ProjectListScreen(
                viewModel = appContainer.projectListViewModel,
                openDrawer = openDrawer,
                navigateToProjectEditor =  actions.navigateToProjectEditor,
@@ -133,7 +134,6 @@ fun InventoryNavGraph(
         }
         composable(MainDestinations.LOGOUT_ROUTE){
             val context = LocalContext.current
-            inventoryDatabase.loggedInUser = null
             context.startActivity(Intent(context, LoginActivity::class.java))
         }
     }

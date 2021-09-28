@@ -20,14 +20,16 @@ class InventoryDatabase private constructor(val context: Context) {
         //setup couchbase lite
         CouchbaseLite.init(context)
 
-        if (BuildConfig.DEBUG) {
-            Database.log.console.domains = LogDomain.ALL_DOMAINS
-            Database.log.console.level = LogLevel.VERBOSE
-        }
+        Database.log.console.domains = LogDomain.ALL_DOMAINS
+        Database.log.console.level = LogLevel.VERBOSE
     }
 
-    fun setTeamProjectDatabaseName(team: String){
-        projectDatabaseName = "project$team"
+    fun getTeamProjectDatabaseName() : String{
+        loggedInUser?.team?.let { team ->
+            projectDatabaseName = "project$team"
+            return "project$team"
+        }
+        return ""
     }
 
     fun deleteDatabase() {
@@ -44,12 +46,28 @@ class InventoryDatabase private constructor(val context: Context) {
         }
     }
 
+    fun closeDatabases() {
+        try {
+            databases.forEach(){
+                it.value.replicator?.let { replicator ->
+                    replicator.stop()
+                }
+                it.value.database.close()
+            }
+            databases.clear()
+            projectDatabaseName = "project"
+        } catch (e: java.lang.Exception){
+            android.util.Log.e(e.message, e.stackTraceToString())
+        }
+    }
+
     fun initializeDatabase() {
         try {
             loggedInUser?.let { user ->
+                val databaseName = getTeamProjectDatabaseName()
                 val dbConfig = DatabaseConfigurationFactory.create(context.filesDir.toString())
                 //if databases don't exist create them from embedded asset
-                if (!Database.exists(projectDatabaseName, context.filesDir)) {
+                if (!Database.exists(databaseName, context.filesDir)) {
 
                     //get location database zip file from apk, write to disk
                     val locationDbPath = File(context.filesDir.toString())
@@ -58,10 +76,10 @@ class InventoryDatabase private constructor(val context: Context) {
 
                     //copy the location database to the project database
                     val locationDbFile = File( String.format( "%s/%s", context.filesDir, (locationDatabase + ".cblite2") ))
-                    Database.copy(locationDbFile, projectDatabaseName, dbConfig)
+                    Database.copy(locationDbFile, databaseName, dbConfig)
                 }
                 //get database and store pointer for later use
-                val database = Database(projectDatabaseName, dbConfig)
+                val database = Database(databaseName, dbConfig)
 
                 //create index for document type if it doesn't exist
                 if (!database.indexes.contains("typeIndex")) {
@@ -80,7 +98,7 @@ class InventoryDatabase private constructor(val context: Context) {
                 }
                 //store pointers for later use
                 val databaseResource = DatabaseResource(database, dbConfig)
-                databases[projectDatabaseName] = databaseResource
+                databases[databaseName] = databaseResource
             }
         } catch (e: Exception) {
             android.util.Log.e(e.message, e.stackTraceToString())

@@ -9,12 +9,15 @@ import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.models.Project
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @InternalCoroutinesApi
 class ProjectListViewModel (private val projectRepository: ProjectRepository)
     : ViewModel() {
+
+    var flow: Flow<List<Project>>? = null
 
     private val _projects: MutableLiveData<List<Project>> by lazy {
         MutableLiveData<List<Project>>()
@@ -27,10 +30,7 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
     val isLoading: LiveData<Boolean> get() = _loading
 
     init {
-        viewModelScope.launch {
-            projectRepository.initializeDatabase()
-            setupFlow()
-        }
+
     }
 
     val deleteProject: (String) -> Boolean = { projectId: String ->
@@ -45,18 +45,21 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
         didDelete
     }
 
-   suspend fun deleteProjects(){
+   fun deleteProjects(){
        viewModelScope.launch {
+           flow = null
            _projects.postValue(mutableListOf<Project>())
-           setupFlow()
        }
    }
 
-   private suspend fun setupFlow(){
-       val flow = projectRepository.getProjectsFlow()
-       flow?.let { f ->
-           f.collect { projectResults ->
-               _projects.postValue(projectResults)
+   fun setup(){
+       viewModelScope.launch(Dispatchers.IO) {
+           projectRepository.initializeDatabase()
+           flow = projectRepository.getProjectsFlow()
+           flow?.let { f ->
+               f.collect { projectResults ->
+                   _projects.postValue(projectResults)
+               }
            }
        }
    }

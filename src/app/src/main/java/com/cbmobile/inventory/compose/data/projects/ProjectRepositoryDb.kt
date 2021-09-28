@@ -22,8 +22,12 @@ import com.cbmobile.inventory.compose.models.ProjectModelDTO
 @InternalCoroutinesApi
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectRepositoryDb(private val inventoryDatabase: InventoryDatabase,
-                          private val locationRepository: LocationRepository)
+                          private val locationRepository: LocationRepository
+)
     : ProjectRepository {
+
+   override val projectDatabaseName
+       get() = inventoryDatabase.getTeamProjectDatabaseName()
 
     override suspend fun getProject(projectId: String): Project {
         return withContext(Dispatchers.IO){

@@ -41,6 +41,7 @@ fun DeveloperScreen(
             ) {
                 DeveloperOptions(
                    currentUser = currentUser,
+                   databaseName = viewModel.databaseName.value,
                    logMessages = viewModel.logMessages,
                    onLoadSampleDataClick = viewModel::onLoadSampleData,
                    onDeleteDatabaseClick = viewModel::onDeleteDatabase)
@@ -52,6 +53,7 @@ fun DeveloperScreen(
 @Composable
 fun DeveloperOptions(
     currentUser: UserProfile,
+    databaseName: String,
     logMessages: List<String>,
     onLoadSampleDataClick: () -> Unit,
     onDeleteDatabaseClick: () -> Unit){
@@ -94,6 +96,14 @@ fun DeveloperOptions(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth().padding(top = 20.dp))
             {
+                Text("Database: ${databaseName}")
+            }
+        }
+        item {
+            Row(horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(top = 20.dp))
+            {
                 TextButton(onClick = { onLoadSampleDataClick() }) {
                     Text("Load Sample Data", style = MaterialTheme.typography.h6)
                 }
@@ -129,6 +139,7 @@ fun DeveloperOptionsPreview(){
     InventoryTheme {
         DeveloperOptions(
             currentUser = UserProfile(),
+            databaseName = "project-team1",
             logMessages = listOf(""),
             onLoadSampleDataClick =  { },
             onDeleteDatabaseClick = { })
