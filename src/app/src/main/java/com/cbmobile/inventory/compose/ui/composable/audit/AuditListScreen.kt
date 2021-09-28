@@ -2,6 +2,8 @@ package com.cbmobile.inventory.compose.ui.composable.audit
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.LifecycleCoroutineScope
@@ -10,11 +12,11 @@ import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.ui.composable.NoItemsFound
 import com.cbmobile.inventory.compose.ui.composable.components.AddButton
 import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
-import com.cbmobile.inventory.compose.ui.composable.project.ProjectList
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 
 @Composable
 fun AuditListScreen(
+    openDrawer: () -> Unit,
     project: String?,
     auditRepository: AuditRepository,
     projectRepository: ProjectRepository,
@@ -29,7 +31,10 @@ fun AuditListScreen(
 
     InventoryTheme {
         // A surface container using the 'background' color from the theme
-        Scaffold(topBar = { InventoryAppBar(title = "${viewModel.project.value.name} Audits")},
+        Scaffold(topBar = { InventoryAppBar(
+                            title = "${viewModel.project.value.name} Audits",
+                            navigationIcon = Icons.Filled.ArrowBack,
+                            navigationOnClick = { navigateUp() })},
             floatingActionButton = { AddButton(navigateToAuditEditor) })
         {
             Surface(

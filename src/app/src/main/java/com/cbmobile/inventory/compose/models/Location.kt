@@ -15,5 +15,6 @@ data class Location (
     val country: String,
     val postalCode: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val type: String
 )

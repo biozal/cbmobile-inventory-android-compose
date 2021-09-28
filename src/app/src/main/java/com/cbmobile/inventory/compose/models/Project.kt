@@ -1,11 +1,9 @@
 package com.cbmobile.inventory.compose.models
 
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.time.toDuration
 
-class ProjectDTO(override var item: Project) : DTO<Project> {
+class ProjectModelDTO(override var item: Project) : ModelDTO<Project> {
 }
 
 data class Project (
@@ -18,6 +16,7 @@ data class Project (
     var location: Location? = null,
 
     //security tracking
+    var team: String = "",
     var createdBy: String = "",
     var modifiedBy: String = "",
     var createdOn: Date? = null,

@@ -4,11 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddLocation
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleCoroutineScope
@@ -25,6 +24,7 @@ import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 
 @Composable
 fun ProjectEditorScreen(
+    openDrawer: () -> Unit,
     currentUser: UserProfile,
     projectJson: String?,
     projectRepository: ProjectRepository,
@@ -42,7 +42,7 @@ fun ProjectEditorScreen(
     InventoryTheme {
         // A surface container using the 'background' color from the theme
         Scaffold(scaffoldState = scaffoldState,
-            topBar = { InventoryAppBar(title = "Project Editor") })
+            topBar = { InventoryAppBar(title = "Project Editor", navigationIcon = Icons.Filled.ArrowBack, navigationOnClick = { navigateUp() }) })
             {
                 Surface(
                     color = MaterialTheme.colors.background,
