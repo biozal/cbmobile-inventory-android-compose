@@ -48,6 +48,23 @@
        "demo4@example.com": { "password": "password", "admin_roles": ["team3"] },
        "demo5@example.com": { "password": "password", "admin_roles": ["team3"] }
       },
+      "roles": {
+        "team1": {
+          "admin_channels": [
+            "channel.team1"
+          ]
+        },
+        "team2": {
+          "admin_channels": [
+            "channel.team2"
+          ]
+        },
+        "team3": {
+          "admin_channels": [
+            "channel.team3"
+          ]
+        }
+      },
     "import_filter":  `
     function import_filter(doc){
       console.log("********Processing import filter - documents from couchbase server");
@@ -81,7 +98,6 @@
          requireRole(team);
          }
       }
-
   // get type property
   function getType() {
     return (isDelete() ? oldDoc.type : doc.type);
