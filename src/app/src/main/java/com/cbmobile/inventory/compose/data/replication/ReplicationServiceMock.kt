@@ -1,6 +1,5 @@
 package com.cbmobile.inventory.compose.data.replication
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.couchbase.lite.ReplicatorChange
 import kotlinx.coroutines.flow.Flow

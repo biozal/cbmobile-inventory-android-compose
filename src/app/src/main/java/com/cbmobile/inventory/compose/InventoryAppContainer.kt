@@ -1,7 +1,7 @@
-package com.cbmobile.inventory.compose.data
+package com.cbmobile.inventory.compose
 
 import android.content.Context
-import android.location.Location
+import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.data.audits.AuditRepository
 import com.cbmobile.inventory.compose.data.audits.AuditRepositoryDb
 import com.cbmobile.inventory.compose.data.location.LocationRepository
@@ -15,7 +15,6 @@ import com.cbmobile.inventory.compose.services.AuthenticationService
 import com.cbmobile.inventory.compose.services.LocalAuthenticationService
 import com.cbmobile.inventory.compose.ui.composable.developer.DeveloperViewModel
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectListViewModel
-import com.cbmobile.inventory.compose.ui.composable.project.ProjectViewModel
 import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationConfigViewModel
 import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -41,14 +40,16 @@ interface AppContainer {
 }
 
 @OptIn(InternalCoroutinesApi::class)
-class AppContainerImp(private val applicationContext: Context) : AppContainer {
+class InventoryAppContainer(private val applicationContext: Context)
+    : AppContainer {
 
     override val inventoryDatabase: InventoryDatabase by lazy {
         InventoryDatabase.getInstance(applicationContext)
     }
 
     override val projectRepository: ProjectRepository by lazy {
-        ProjectRepositoryDb(inventoryDatabase = inventoryDatabase, locationRepository = locationRepository)
+        ProjectRepositoryDb(inventoryDatabase = inventoryDatabase,
+            locationRepository = locationRepository)
     }
 
     override val auditRepository: AuditRepository by lazy {

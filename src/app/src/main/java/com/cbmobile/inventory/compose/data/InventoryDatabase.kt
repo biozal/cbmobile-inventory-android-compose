@@ -11,9 +11,9 @@ import java.util.zip.ZipInputStream
 
 class InventoryDatabase private constructor(val context: Context) {
 
-    var databases: MutableMap<String, DatabaseResource> = mutableMapOf<String, DatabaseResource>()
+    var databases: MutableMap<String, DatabaseResource> = mutableMapOf()
     var projectDatabaseName = "project"
-    var locationDatabase = "locations"
+    private var locationDatabase = "locations"
     var loggedInUser: UserProfile? = null
 
     init {
@@ -34,7 +34,7 @@ class InventoryDatabase private constructor(val context: Context) {
 
     fun deleteDatabase() {
         try {
-            databases.forEach(){
+            databases.forEach {
                 if (Database.exists(it.key, context.filesDir)){
                     it.value.database.close()
                     Database.delete(it.key, context.filesDir)
@@ -48,10 +48,8 @@ class InventoryDatabase private constructor(val context: Context) {
 
     fun closeDatabases() {
         try {
-            databases.forEach(){
-                it.value.replicator?.let { replicator ->
-                    replicator.stop()
-                }
+            databases.forEach{
+                it.value.replicator?.stop()
                 it.value.database.close()
             }
             databases.clear()
@@ -63,7 +61,7 @@ class InventoryDatabase private constructor(val context: Context) {
 
     fun initializeDatabase() {
         try {
-            loggedInUser?.let { user ->
+            loggedInUser?.let { _ ->
                 val databaseName = getTeamProjectDatabaseName()
                 val dbConfig = DatabaseConfigurationFactory.create(context.filesDir.toString())
                 //if databases don't exist create them from embedded asset
@@ -75,7 +73,7 @@ class InventoryDatabase private constructor(val context: Context) {
                     unzip("locations.zip", locationDbPath)
 
                     //copy the location database to the project database
-                    val locationDbFile = File( String.format( "%s/%s", context.filesDir, (locationDatabase + ".cblite2") ))
+                    val locationDbFile = File( String.format( "%s/%s", context.filesDir, ("${locationDatabase}.cblite2") ))
                     Database.copy(locationDbFile, databaseName, dbConfig)
                 }
                 //get database and store pointer for later use
@@ -97,7 +95,7 @@ class InventoryDatabase private constructor(val context: Context) {
                             )))
                 }
                 //store pointers for later use
-                val databaseResource = DatabaseResource(database, dbConfig)
+                val databaseResource = DatabaseResource(database)
                 databases[databaseName] = databaseResource
             }
         } catch (e: Exception) {
@@ -136,5 +134,5 @@ class InventoryDatabase private constructor(val context: Context) {
         }
     }
 
-    companion object : Singleton<InventoryDatabase, Context>(::InventoryDatabase);
+    companion object : Singleton<InventoryDatabase, Context>(::InventoryDatabase)
 }

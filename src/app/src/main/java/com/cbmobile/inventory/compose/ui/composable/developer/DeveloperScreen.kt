@@ -13,7 +13,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cbmobile.inventory.compose.models.UserProfile
 import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
-import com.cbmobile.inventory.compose.ui.composable.project.ProjectListViewModel
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -96,7 +95,7 @@ fun DeveloperOptions(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth().padding(top = 20.dp))
             {
-                Text("Database: ${databaseName}")
+                Text("Database: $databaseName")
             }
         }
         item {

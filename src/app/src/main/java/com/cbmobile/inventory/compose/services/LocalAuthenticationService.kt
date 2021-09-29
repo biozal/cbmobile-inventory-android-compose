@@ -16,7 +16,7 @@ class LocalAuthenticationService(val inventoryDatabase: InventoryDatabase) : Aut
     }
 
     override fun authenticatedUser(username: String, password: String): Boolean {
-        var filterUsers = users.filter { it.username == username && it.password == password && it.isActive }
+        val filterUsers = users.filter { it.username == username && it.password == password && it.isActive }
         if (filterUsers.count() == 1){
             inventoryDatabase.loggedInUser = filterUsers[0]
             return true

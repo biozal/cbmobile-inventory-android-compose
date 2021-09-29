@@ -94,7 +94,7 @@ fun Drawer(
 @Preview
 @Composable
 fun DrawerPreview() {
-    val onClicked: (String) -> Unit = { route -> }
+    val onClicked: (String) -> Unit = { _ -> }
     InventoryTheme {
         Drawer(onClicked = onClicked)
     }

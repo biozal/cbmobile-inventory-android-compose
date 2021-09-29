@@ -1,6 +1,5 @@
 package com.cbmobile.inventory.compose.ui.composable.project
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,10 +27,6 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
         MutableLiveData<Boolean>(false)
     }
     val isLoading: LiveData<Boolean> get() = _loading
-
-    init {
-
-    }
 
     val deleteProject: (String) -> Boolean = { projectId: String ->
         var didDelete = false

@@ -14,11 +14,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.data.projects.ProjectRepositoryMock
 import com.cbmobile.inventory.compose.models.Project
-import com.cbmobile.inventory.compose.ui.composable.HorizontalDottedProgressBar
-import com.cbmobile.inventory.compose.ui.composable.NoItemsFound
+import com.cbmobile.inventory.compose.ui.composable.components.HorizontalDottedProgressBar
+import com.cbmobile.inventory.compose.ui.composable.components.NoItemsFound
 import com.cbmobile.inventory.compose.ui.composable.components.AddButton
 import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
@@ -152,7 +151,7 @@ fun ProjectCard(project: Project,
                         onDismissRequest = { expanded = false })
                     {
                         DropdownMenuItem(onClick = {
-                            var projectJson = Gson().toJson(project)
+                            val projectJson = Gson().toJson(project)
                             onEditChange(projectJson)
                         }) {
                             Text("Edit")
@@ -238,7 +237,7 @@ fun ProjectListScreenPreview() {
     val onDeleteChange: (String) -> Boolean  = { _: String -> false }
     val viewModel = ProjectListViewModel(ProjectRepositoryMock())
     val scaffoldState:ScaffoldState = rememberScaffoldState()
-    val corouteScope = rememberCoroutineScope()
+    val coRouteScope = rememberCoroutineScope()
 
     InventoryTheme {
         Scaffold(floatingActionButton = { AddButton(navigateToProjectEditor) })
@@ -253,7 +252,7 @@ fun ProjectListScreenPreview() {
                     onProjectSelected,
                     onEditChange,
                     onDeleteChange,
-                    corouteScope,
+                    coRouteScope,
                     scaffoldState)
             }
         }

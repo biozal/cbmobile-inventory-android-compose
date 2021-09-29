@@ -1,6 +1,5 @@
 package com.cbmobile.inventory.compose.data.replication
 
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import com.cbmobile.inventory.compose.data.DatabaseResource
 import com.cbmobile.inventory.compose.data.InventoryDatabase
@@ -35,29 +34,27 @@ class ReplicationServiceDb(val inventoryDatabase: InventoryDatabase) : Replicati
             databaseResource?.replicator?.status?.activityLevel == ReplicatorActivityLevel.OFFLINE)
         ){
             databaseResource?.let { dbResource ->
-                dbResource.database?.let { db ->
-                    val urlEndPoint = URLEndpoint(URI(replicationConfigDTO.endpointUrl))
-                    dbResource.replicatorConfiguration = ReplicatorConfiguration(db, urlEndPoint)
-                    dbResource.replicatorConfiguration?.let { replicatorConfiguration ->
-                        replicatorConfiguration?.isContinuous = replicationConfigDTO.continuous
+                val urlEndPoint = URLEndpoint(URI(replicationConfigDTO.endpointUrl))
+                dbResource.replicatorConfiguration = ReplicatorConfiguration(dbResource.database, urlEndPoint)
+                dbResource.replicatorConfiguration?.let { replicatorConfiguration ->
+                    replicatorConfiguration.isContinuous = replicationConfigDTO.continuous
 
-                        when (replicationConfigDTO.replicatorType) {
-                            "PULL" -> replicatorConfiguration.type = ReplicatorType.PULL
-                            "PUSH" -> replicatorConfiguration.type = ReplicatorType.PUSH
-                            else -> replicatorConfiguration.type =  ReplicatorType.PUSH_AND_PULL
-                        }
-                        val authenticator = BasicAuthenticator(
-                            replicationConfigDTO.username,
-                            replicationConfigDTO.password.toCharArray()
-                        )
-                        replicatorConfiguration.setAuthenticator(authenticator)
-                        dbResource.replicator =
-                            Replicator(databaseResource?.replicatorConfiguration!!)
+                    when (replicationConfigDTO.replicatorType) {
+                        "PULL" -> replicatorConfiguration.type = ReplicatorType.PULL
+                        "PUSH" -> replicatorConfiguration.type = ReplicatorType.PUSH
+                        else -> replicatorConfiguration.type =  ReplicatorType.PUSH_AND_PULL
                     }
-
-                    canStartReplication.value = true
-                    this.replicationConfigDTO.value = replicationConfigDTO
+                    val authenticator = BasicAuthenticator(
+                        replicationConfigDTO.username,
+                        replicationConfigDTO.password.toCharArray()
+                    )
+                    replicatorConfiguration.setAuthenticator(authenticator)
+                    dbResource.replicator =
+                        Replicator(databaseResource?.replicatorConfiguration!!)
                 }
+
+                canStartReplication.value = true
+                this.replicationConfigDTO.value = replicationConfigDTO
             }
         } else {
                 throw Exception("Error: can't update Replicator Config because replication is running")
@@ -97,15 +94,11 @@ class ReplicationServiceDb(val inventoryDatabase: InventoryDatabase) : Replicati
     }
 
     override fun startReplication() {
-        databaseResource?.replicator?.let {
-            it.start()
-        }
+        databaseResource?.replicator?.start()
     }
 
     override fun stopReplication() {
-        databaseResource?.replicator?.let {
-            it.stop()
-        }
+        databaseResource?.replicator?.stop()
     }
 
     override fun getReplicatorChangeFlow(): Flow<ReplicatorChange>? {
@@ -123,7 +116,6 @@ object ReplicationStatus {
     const val IDlE = "Idle"
     const val BUSY = "Busy"
     const val CONNECTING = "Connecting"
-    const val ERROR = "Error"
     const val UNINITIALIZED = "Not Initialized"
     const val NOCONFIG = "No Replication Configuration"
 }

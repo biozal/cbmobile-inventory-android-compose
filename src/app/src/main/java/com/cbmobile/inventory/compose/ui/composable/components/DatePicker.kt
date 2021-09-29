@@ -83,9 +83,9 @@ fun showDatePickerDialog(activity: Context,
     val datePickerDialog = DatePickerDialog(
         activity,
         android.R.style.Theme_Material_Dialog,
-        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+        { _: DatePicker, theYear: Int, theMonth: Int, dayOfMonth: Int ->
             val cal = Calendar.getInstance()
-            cal.set(year, month, dayOfMonth)
+            cal.set(theYear, theMonth, dayOfMonth)
             onDateChanged(cal.timeInMillis)
         }, year, month, day)
 

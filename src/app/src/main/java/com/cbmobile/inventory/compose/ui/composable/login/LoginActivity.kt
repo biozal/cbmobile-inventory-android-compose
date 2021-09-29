@@ -27,7 +27,6 @@ import com.cbmobile.inventory.compose.ui.composable.MainActivity
 
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import dagger.hilt.android.AndroidEntryPoint
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,13 +52,20 @@ fun SetupLogin(viewModel: LoginViewModel){
     val username = viewModel.username.observeAsState("")
     val password =  viewModel.password.observeAsState("")
     val isError = viewModel.isError.observeAsState(false)
+    val context = LocalContext.current
+
+    val onLoginCheck: () -> Unit = {
+        if (viewModel.login()){
+            context.startActivity(Intent(context, MainActivity::class.java))
+        }
+    }
 
     Login(username = username.value,
         password = password.value,
         isLoginError = isError.value,
         onUsernameChanged = viewModel.onUsernameChanged,
         onPasswordChanged = viewModel.onPasswordChanged,
-        login = viewModel::login)
+        login = onLoginCheck)
 }
 
 @Composable
@@ -69,9 +75,9 @@ fun Login(
     isLoginError: Boolean,
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
-    login: () -> Boolean) {
-    val context = LocalContext.current
+    login: () -> Unit) {
 
+    val context = LocalContext.current
     Column(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight()
@@ -98,17 +104,12 @@ fun Login(
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
-                if (login()){
-                    context.startActivity(Intent(context, MainActivity::class.java))
-                }
+                login()
             })
         )
         Button(modifier = Modifier.padding(top = 32.dp),
             onClick = {
-                if (login()){
-                    context.startActivity(Intent(context, MainActivity::class.java))
-                }
-
+                login()
             })
         {
             Text("Login", style = MaterialTheme.typography.h5)
@@ -127,9 +128,9 @@ fun Login(
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    val username : String = ""
-    val password: String = ""
-    val isError: Boolean = false
+    val username = ""
+    val password = ""
+    val isError = false
 
     InventoryTheme {
         Login(username = username,
@@ -137,6 +138,6 @@ fun DefaultPreview() {
             isLoginError = isError,
             onUsernameChanged = { },
             onPasswordChanged = { },
-            login = { false } )
+            login = { } )
     }
 }

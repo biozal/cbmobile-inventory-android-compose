@@ -11,8 +11,8 @@ data class Audit (
     var name: String = "",
     var count: Int = 0,
     var type: String = "audit",
-    var notes: String? = null,
-    var partNumber: String? = null,
+    var notes: String = "",
+    var partNumber: String = "",
     var pictureMetadata: String? = null,
     var team: String = ""
 )

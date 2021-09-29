@@ -1,6 +1,5 @@
 package com.cbmobile.inventory.compose.data.projects
 
-import android.content.Context
 import java.util.*
 import java.text.SimpleDateFormat
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +13,6 @@ import com.couchbase.lite.*
 import com.google.gson.Gson
 import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.data.location.LocationRepository
-import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.Project
 import com.cbmobile.inventory.compose.models.ProjectModelDTO
 
@@ -44,30 +42,6 @@ class ProjectRepositoryDb(private val inventoryDatabase: InventoryDatabase,
             }
             return@withContext Project(projectId = projectId, createdOn = Date(), modifiedOn = Date())
         }
-    }
-
-    fun getProjectDocumentChangeFlow(documentId: String) : Flow<Project?>?{
-        val db =
-            inventoryDatabase.databases[inventoryDatabase.projectDatabaseName]?.database
-        db?.let { database ->
-            return database.documentChangeFlow(documentId)
-                .map { dc -> mapDocumentChangeToProject(dc) }
-                .flowOn(Dispatchers.IO)
-        }
-        return null
-    }
-
-    private fun mapDocumentChangeToProject(documentChange: DocumentChange) : Project?{
-        var project: Project? = null
-        val db =
-            inventoryDatabase.databases[inventoryDatabase.projectDatabaseName]?.database
-        db?.let { database ->
-            val doc = database.getDocument(documentChange.documentID)
-            doc?.let { document ->
-                project = Gson().fromJson(document.toJSON(), Project::class.java)
-            }
-        }
-        return project
     }
 
     override fun getProjectsFlow(): Flow<List<Project>>? {
@@ -168,26 +142,26 @@ class ProjectRepositoryDb(private val inventoryDatabase: InventoryDatabase,
         return withContext(Dispatchers.IO){
             try {
                 inventoryDatabase.loggedInUser?.let {
-                    var locations = locationRepository.getLocations()
-                    var locationLength = locations.count() - 1
+                    val locations = locationRepository.getLocations()
+                    val locationLength = locations.count() - 1
                     saveProject(Project(projectId = UUID.randomUUID().toString(), name = "Audit ${ (1..1000000).random() }", description = getRandomDescription()
-                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy").parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
+                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy", Locale.US).parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
                         createdBy = it.username, modifiedOn = Date(), modifiedBy = it.username, location = locations[(0..locationLength).random()]))
 
                     saveProject(Project(projectId = UUID.randomUUID().toString(), name = "Audit ${ (1..1000000).random() }", description = getRandomDescription()
-                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy").parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
+                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy", Locale.US).parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
                         createdBy = it.username, modifiedOn = Date(), modifiedBy = it.username, location = locations[(0..locationLength).random()]))
 
                     saveProject(Project(projectId = UUID.randomUUID().toString(), name = "Audit ${ (1..1000000).random() }", description = getRandomDescription()
-                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy").parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
+                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy", Locale.US).parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
                         createdBy = it.username, modifiedOn = Date(), modifiedBy = it.username, location = locations[(0..locationLength).random()]))
 
                     saveProject(Project(projectId = UUID.randomUUID().toString(), name = "Audit ${ (1..1000000).random() }", description = getRandomDescription()
-                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy").parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
+                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy", Locale.US).parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
                         createdBy = it.username, modifiedOn = Date(), modifiedBy = it.username, location = locations[(0..locationLength).random()]))
 
                     saveProject(Project(projectId = UUID.randomUUID().toString(), name = "Audit ${ (1..1000000).random() }", description = getRandomDescription()
-                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy").parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
+                        ,isComplete = false, type = "project", dueDate = SimpleDateFormat("MM-dd-yyyy", Locale.US).parse("${(1..12).random()}-${(1..27).random()}-${(2021..2023).random()}"), team = it.team,
                         createdBy = it.username, modifiedOn = Date(), modifiedBy = it.username, location = locations[(0..locationLength).random()]))
                 }
 
@@ -197,8 +171,8 @@ class ProjectRepositoryDb(private val inventoryDatabase: InventoryDatabase,
         }
     }
 
-    fun getRandomDescription() : String{
-        var descriptions = mutableListOf("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+    private fun getRandomDescription() : String{
+        val descriptions = mutableListOf("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
         descriptions.add("Empressr bubbli hulu twones meebo kiko yoono, hojoki mog eduvant airbnb kiko heekya, cotweet wufoo meebo yammer greplin. geni foodzie. Cuil yammer plaxo stypi flickr, diigo zimbra doostang blyve hipmunk, flickr heekya palantir. Kiko kno diigo udemy hipmunk zillow eskobo qeyno, dopplr mobly joost edmodo omgpop. Airbnb gsnap spock spotify, ngmoco wufoo. Yuntaa vimeo chartly joukuu unigo wesabe, kazaa appjet sifteo rovio. Movity mog meevee qeyno plugg, hipmunk imvu. Babblely skype empressr oovoo, udemy mobly. Kippt whrrl ebay dogster, mzinga eskobo heekya prezi, shopify plaxo. Nuvvo jabber sclipo kazaa sifteo yuntaa, imvu wikia eduvant. Woopra oooj loopt oooooc zoho, wikia vuvox. Chartly chegg foodzie twones, cloudera oooj. Elgg bitly hipmunk jabber movity chegg tivo, ideeli blippy ngmoco stypi.")
         descriptions.add("Yoono wakoopa boxbe zooomr, balihoo. Wufoo ngmoco chumby rovio, edmodo. Chartly knewton twones jibjab zoodles, boxbe babblely appjet koofers, babblely waze ifttt.   Koofers babblely waze ifttt orkut, kosmix chartly reddit, revver joyent spotify. Balihoo cuil chegg wikia trulia, geni weebly spotify jabber, zapier zinch unigo. Prezi kaboodle groupon jumo reddit, yuntaa vimeo chumby, bubbli kaboodle zoosk. Skype cuil mog jumo, whrrl mzinga. Qeyno klout blyve kosmix empressr, kiko grockit kazaa.")
         descriptions.add("Webtwo ipsum kosmix joukuu ebay. Bebo chartly xobni qeyno, rovio. Bebo woopra plugg flickr oooj boxbe zanga, jajah blekko yoono lanyrd. Wakoopa geni zinch elgg, tumblr. Greplin jaiku jiglu zanga plugg, prezi kosmix disqus. Quora vuvox chegg orkut, mzinga. Mog cotweet napster zoodles reddit, flickr unigo wesabe, babblely convore divvyshot. Napster loopt gooru joost klout chumby chegg blippy, gsnap wikia wufoo sococo bitly. Wakoopa plugg tumblr heekya jaiku unigo spotify, mobly dropio odeo convore. Chumby tumblr bitly ning twones zappos twitter, reddit loopt chegg tumblr. Stypi cloudera doostang trulia xobni knewton, jumo geni zillow ning. Imeem doostang convore heroku eduvant oooooc shopify, insala airbnb jumo zynga. Kazaa koofers bebo, oooooc.")
