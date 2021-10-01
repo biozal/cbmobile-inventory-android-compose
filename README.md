@@ -4,7 +4,7 @@ The Inventory Demo App is a simple Android application written in Kotlin and use
 
 # Getting Started
 
-For full docuemntation on this application, please see the this repos [Wiki](https://github.com/biozal/cbmobile-inventory-android-compose/wiki).  
+For full docuemntation on this application, please see the repo [Wiki](https://github.com/biozal/cbmobile-inventory-android-compose/wiki).  
 
 ## Pre-requisites
 
