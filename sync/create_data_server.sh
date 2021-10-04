@@ -3,7 +3,7 @@ curl -v -X POST http://localhost:8091/pools/default/buckets \
 -d name=projects \
 -d ramQuotaMB=256
 
-sleep 20s
+sleep 10s
 curl -v http://localhost:8093/query/service \
   -u Administrator:password \
   -d 'statement=CREATE INDEX idx_projects_team on projects(team)'
