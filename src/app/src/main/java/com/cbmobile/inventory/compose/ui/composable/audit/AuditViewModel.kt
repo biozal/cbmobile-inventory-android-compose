@@ -58,15 +58,19 @@ class AuditViewModel(
 
     val onSaveAudit: () -> Unit = {
         viewModelScope.launch {
-            //clean up data - remove spaces at the end of strings
-            audit.value.name = audit.value.name.trim()
-            audit.value.notes?.let { notes ->
-                audit.value.notes = notes.trim()
+            projectId?.let {
+                //clean up data - remove spaces at the end of strings
+                audit.value.name = audit.value.name.trim()
+                audit.value.notes?.let { notes ->
+                    audit.value.notes = notes.trim()
+                }
+                audit.value.partNumber?.let { partNumber ->
+                    audit.value.partNumber = partNumber.trim()
+                }
+                //add in the project of the audit
+                audit.value.projectId = it
+                auditRepository.saveAudit(audit.value)
             }
-            audit.value.partNumber?.let { partNumber ->
-                audit.value.partNumber = partNumber.trim()
-            }
-            auditRepository.saveAudit(audit.value)
         }
     }
 
