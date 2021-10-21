@@ -8,7 +8,7 @@ interface ReplicationService {
 
     val replicationConfigDTO: MutableState<ReplicationConfigDTO>
     val replicationStatus: MutableState<String>
-
+    var isReplicationStarted: Boolean
     val replicationTypes: List<String>
     val canStartReplication: MutableState<Boolean>
 
@@ -19,4 +19,6 @@ interface ReplicationService {
     fun startReplication()
     fun stopReplication()
     fun getReplicatorChangeFlow() : Flow<ReplicatorChange>?
+
+    fun dispose()
 }

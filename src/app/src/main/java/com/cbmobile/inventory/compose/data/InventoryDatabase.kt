@@ -24,6 +24,13 @@ class InventoryDatabase private constructor(val context: Context) {
         Database.log.console.level = LogLevel.VERBOSE
     }
 
+    fun dispose () {
+        databases.forEach{
+            it.value.replicator?.stop()
+            it.value.database.close()
+        }
+
+    }
     fun getTeamProjectDatabaseName() : String{
         loggedInUser?.team?.let { team ->
             projectDatabaseName = "project$team"

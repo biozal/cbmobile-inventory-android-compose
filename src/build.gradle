@@ -21,10 +21,13 @@ buildscript {
         ext.tools_build_version = '7.0.0'
 
         ext.robolectric_version = '4.6.1'
-        ext.couchbase_lite_version = "3.0.0-beta01"
+        ext.couchbase_lite_version = "3.0.0-beta02"
     }
 
     repositories {
+        maven {
+            url "https://mobile.maven.couchbase.com/maven2/dev/"
+        }
         google()
         mavenCentral()
     }
@@ -44,6 +47,9 @@ plugins {
 
 subprojects {
     repositories {
+        maven {
+            url "https://mobile.maven.couchbase.com/maven2/dev/"
+        }
         google()
         mavenCentral()
     }

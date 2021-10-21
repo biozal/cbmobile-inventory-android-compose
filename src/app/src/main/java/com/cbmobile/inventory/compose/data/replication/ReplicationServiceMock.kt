@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 class ReplicationServiceMock : ReplicationService {
 
+    override var isReplicationStarted = false;
+
     override val replicationConfigDTO = mutableStateOf(ReplicationConfigDTO(
             username = "demo@example.com",
             password = "password",
@@ -40,6 +42,10 @@ class ReplicationServiceMock : ReplicationService {
     }
 
     override fun getReplicatorChangeFlow(): Flow<ReplicatorChange>? {
+        TODO("Not yet implemented")
+    }
+
+    override fun dispose() {
         TODO("Not yet implemented")
     }
 }

@@ -110,8 +110,10 @@ dependencies {
     implementation "com.google.android.material:material:$android_materialdesign_version"
 
     //couchbase lite for kotlin
-    implementation"com.couchbase.lite:couchbase-lite-android:$couchbase_lite_version"
     implementation"com.couchbase.lite:couchbase-lite-android-ktx:$couchbase_lite_version"
+    //implementation"com.couchbase.lite:couchbase-lite-android:$couchbase_lite_version"
+    //implementation files('libs/couchbase-lite-android-ee-ktx-3.0.0-180.aar')
+    //implementation files('libs/couchbase-lite-android-ee-3.0.0-180.aar')
 
     androidTestImplementation "androidx.test:rules:$androidx_test_runner_version"
     androidTestImplementation "androidx.test:runner:$androidx_test_runner_version"
@@ -120,7 +122,6 @@ dependencies {
 
     androidTestImplementation "androidx.test.ext:junit:$androidx_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_espresso_version"
-
 
     // Robolectric dependencies
     testImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"

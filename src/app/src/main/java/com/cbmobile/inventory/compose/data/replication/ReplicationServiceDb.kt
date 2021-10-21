@@ -1,5 +1,6 @@
 package com.cbmobile.inventory.compose.data.replication
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import com.cbmobile.inventory.compose.data.DatabaseResource
 import com.cbmobile.inventory.compose.data.InventoryDatabase
@@ -13,6 +14,9 @@ import java.net.URI
 @OptIn( ExperimentalCoroutinesApi::class)
 class ReplicationServiceDb(val inventoryDatabase: InventoryDatabase) : ReplicationService {
     private var databaseResource: DatabaseResource? = null
+
+    //track replication state
+    override var isReplicationStarted = false
 
     override var replicationConfigDTO = mutableStateOf(ReplicationConfigDTO(
         username = "",
@@ -94,11 +98,21 @@ class ReplicationServiceDb(val inventoryDatabase: InventoryDatabase) : Replicati
     }
 
     override fun startReplication() {
-        databaseResource?.replicator?.start()
+        try {
+            databaseResource?.replicator?.start()
+            isReplicationStarted = true
+        } catch (e: Exception) {
+            Log.e(e.message, e.stackTraceToString())
+        }
     }
 
     override fun stopReplication() {
-        databaseResource?.replicator?.stop()
+        try {
+            databaseResource?.replicator?.stop()
+            isReplicationStarted = false
+        } catch (e: Exception) {
+            Log.e(e.message, e.stackTraceToString())
+        }
     }
 
     override fun getReplicatorChangeFlow(): Flow<ReplicatorChange>? {
@@ -106,6 +120,9 @@ class ReplicationServiceDb(val inventoryDatabase: InventoryDatabase) : Replicati
             return it.replicatorChangesFlow()
         }
         return null
+    }
+
+    override fun dispose() {
     }
 }
 
