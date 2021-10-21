@@ -1,12 +1,13 @@
 package com.cbmobile.inventory.compose.data.audits
 
 import com.cbmobile.inventory.compose.models.Audit
+import kotlinx.coroutines.flow.Flow
 
 interface AuditRepository {
 
-    suspend fun getAuditsByProjectId(projectId: String) : List<Audit>
+    fun getAuditsByProjectId(projectId: String): Flow<List<Audit>>?
 
-    suspend fun getAudit(auditId: String): Audit
+    suspend fun getAudit(projectId: String, auditId: String): Audit
 
     suspend fun saveAudit(audit: Audit)
 

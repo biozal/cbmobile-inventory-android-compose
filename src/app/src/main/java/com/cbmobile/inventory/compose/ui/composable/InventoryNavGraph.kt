@@ -16,6 +16,7 @@ import com.cbmobile.inventory.compose.ui.composable.developer.DeveloperScreen
 import com.cbmobile.inventory.compose.ui.composable.replication.ReplicationScreen
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditEditorScreen
 import com.cbmobile.inventory.compose.ui.composable.audit.AuditListScreen
+import com.cbmobile.inventory.compose.ui.composable.audit.AuditListViewModel
 import com.cbmobile.inventory.compose.ui.composable.login.LoginActivity
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectListScreen
 import com.cbmobile.inventory.compose.ui.composable.project.ProjectEditorScreen
@@ -79,13 +80,17 @@ fun InventoryNavGraph(
             )
         }
         composable(MainDestinations.AUDIT_LIST_ROUTE_PATH){ backstackEntry ->
+            val viewModel = AuditListViewModel(
+                projectJson = backstackEntry.arguments?.getString(MainDestinations.PROJECT_EDITOR_KEY_ID),
+                projectRepository = appContainer.projectRepository,
+                auditRepository =  appContainer.auditRepository)
+
             AuditListScreen(
-                openDrawer = openDrawer,
-                backstackEntry.arguments?.getString(MainDestinations.PROJECT_EDITOR_KEY_ID),
-                appContainer.auditRepository,
-                appContainer.projectRepository,
+                viewModel = viewModel,
                 actions.upPress,
-                actions.navigateToAuditEditor)
+                actions.navigateToAuditEditor,
+                scaffoldState =  scaffoldState,
+                snackBarCoroutineScope = scope)
         }
         composable(MainDestinations.AUDIT_EDITOR_ROUTE_PATH){ backstackEntry ->
             AuditEditorScreen(

@@ -1,9 +1,8 @@
 package com.cbmobile.inventory.compose.models
 
+import java.util.*
 
-data class AuditWrapper (
-    val audit: Audit
-)
+class AuditModelDTO(override var item: Audit) : ModelDTO<Audit>
 
 data class Audit (
     var auditId: String = "",
@@ -14,5 +13,10 @@ data class Audit (
     var notes: String = "",
     var partNumber: String = "",
     var pictureMetadata: String? = null,
-    var team: String = ""
+    //security tracking
+    var team: String = "",
+    var createdBy: String = "",
+    var modifiedBy: String = "",
+    var createdOn: Date? = null,
+    var modifiedOn: Date? = null
 )

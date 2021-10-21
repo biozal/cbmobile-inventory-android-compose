@@ -1,9 +1,10 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        ext.kotlin_version = '1.5.21'
+        ext.kotlin_version = '1.5.31'
         ext.kotlin_coroutines_version = '1.5.2-native-mt'
-        ext.compose_version = '1.0.2'
+        ext.google_accompanist_version = '0.20.0'
+        ext.compose_version = '1.0.4'
         ext.coroutines_version = '1.5.0'
         ext.accompanist_version = '0.18.0'
         ext.constraints_compose_version = '1.0.0-beta02'
@@ -17,8 +18,9 @@ buildscript {
         ext.androidx_test_runner_version = '1.4.0'
         ext.androidx_junit_version = '1.1.3'
         ext.androidx_espresso_version = '3.4.0'
-        ext.hilt_android_version = '2.38.1'
+        ext.androidx_junit4_version = '1.0.4'
         ext.tools_build_version = '7.0.0'
+        ext.androidx_compose_ui_test = '1.0.4'
 
         ext.robolectric_version = '4.6.1'
         ext.couchbase_lite_version = "3.0.0-beta02"

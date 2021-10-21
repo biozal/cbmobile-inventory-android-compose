@@ -3,40 +3,42 @@ package com.cbmobile.inventory.compose.data.audits
 import android.content.Context
 import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.models.Audit
-import com.cbmobile.inventory.compose.models.AuditWrapper
+import com.cbmobile.inventory.compose.models.AuditModelDTO
 import com.couchbase.lite.MutableDocument
+import com.couchbase.lite.QueryChange
+import com.couchbase.lite.queryChangeFlow
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.*
-import kotlin.collections.ArrayList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuditRepositoryDb(var context: Context) : AuditRepository {
    private val databaseResources: InventoryDatabase = InventoryDatabase.getInstance(context)
 
-    override suspend fun getAuditsByProjectId(projectId: String): List<Audit> {
-        val list = ArrayList<Audit>()
-        return withContext(Dispatchers.IO){
-            try {
-                val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
-                db?.let  { database ->
-                    val query = database.createQuery("SELECT * FROM project AS audit WHERE type=\"audit\" AND projectId=\"$projectId\"")
-                    query.execute().forEach { result ->
-                        val json = result.toJSON()
-                        val auditWrapper = Gson().fromJson(json, AuditWrapper::class.java)
-                        list.add(auditWrapper.audit)
-                    }
-                }
-            } catch (e: Exception){
-                android.util.Log.e(e.message, e.stackTraceToString())
+    override fun getAuditsByProjectId(projectId: String): Flow<List<Audit>>? {
+        try {
+            val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
+            db?.let  { database ->
+                val query = database.createQuery("SELECT * FROM _ AS item WHERE type=\"audit\" AND projectId=\"$projectId\"")
+                val flow = query
+                    .queryChangeFlow()
+                    .map { qc -> mapQueryChangeToAudit(qc)}
+                    .flowOn(Dispatchers.IO)
+                query.execute()
+                return flow
             }
-            return@withContext list
+        } catch (e: Exception){
+            android.util.Log.e(e.message, e.stackTraceToString())
         }
+        return null
     }
 
-    override suspend fun getAudit(auditId: String): Audit {
+    override suspend fun getAudit(projectId: String, auditId: String): Audit {
         return withContext(Dispatchers.IO){
             try {
                 val db = databaseResources.databases[databaseResources.projectDatabaseName]?.database
@@ -49,7 +51,14 @@ class AuditRepositoryDb(var context: Context) : AuditRepository {
             } catch (e: Exception) {
                 android.util.Log.e(e.message, e.stackTraceToString())
             }
-            return@withContext Audit(UUID.randomUUID().toString())
+            return@withContext Audit(
+                projectId = projectId,
+                auditId = UUID.randomUUID().toString(),
+                createdOn = Date(),
+                modifiedOn =  Date(),
+                createdBy = databaseResources.loggedInUser!!.username,
+                modifiedBy = databaseResources.loggedInUser!!.password,
+                team = databaseResources.loggedInUser!!.team)
         }
     }
 
@@ -86,5 +95,15 @@ class AuditRepositoryDb(var context: Context) : AuditRepository {
             }
             return@withContext result
         }
+    }
+
+    private fun mapQueryChangeToAudit (queryChange: QueryChange) : List<Audit> {
+        val audits = mutableListOf<Audit>()
+        queryChange.results?.let { results ->
+            results.forEach(){ result ->
+                audits.add(Gson().fromJson(result.toJSON(), AuditModelDTO::class.java).item)
+            }
+        }
+        return audits
     }
 }
