@@ -18,8 +18,8 @@ fun NoItemsFound () {
                modifier = Modifier
                    .padding(8.dp)
                    .align(Alignment.CenterHorizontally),
-               text = "",
-               style = MaterialTheme.typography.h4
+               text = "No Items found in the database",
+               style = MaterialTheme.typography.h5
            )
        }
     }

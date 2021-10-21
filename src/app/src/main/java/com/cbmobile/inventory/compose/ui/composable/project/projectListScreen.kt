@@ -49,7 +49,8 @@ fun ProjectListScreen(
                 color = MaterialTheme.colors.background,
                 modifier = Modifier.fillMaxSize()
             ) {
-                ProjectList(projects.value,
+                var projects = viewModel.projects.observeAsState()
+                ProjectList(projects?.value,
                             isLoading.value,
                             navigateToAuditListByProject,
                             navigateToProjectEditor,
@@ -64,7 +65,7 @@ fun ProjectListScreen(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProjectList(
-    items: List<Project>,
+    items: List<Project>?,
     isLoading: Boolean,
     onProjectSelected: (String) -> Unit,
     onEditChange: (String) -> Unit,
@@ -72,25 +73,27 @@ fun ProjectList(
     snackBarCoroutineScope: CoroutineScope,
     scaffoldState: ScaffoldState)
 {
-    if (isLoading && items.isEmpty()) {
-        HorizontalDottedProgressBar()
-    }
-    else if (items.isEmpty()){
-        NoItemsFound()
-    }
-    else {
-        LazyColumn(
-            modifier = Modifier .padding(16.dp)) {
-            for (project in items) {
-                item {  
-                    ProjectCard(
-                        project,
-                        onProjectSelected,
-                        onEditChange,
-                        onDeleteChange,
-                        snackBarCoroutineScope,
-                        scaffoldState)
-                    Spacer(modifier = Modifier.padding(top = 30.dp))
+    items?.let {
+        if (isLoading && it.isEmpty()) {
+            HorizontalDottedProgressBar()
+        } else if (it.isEmpty()) {
+            NoItemsFound()
+        } else {
+            LazyColumn(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                for (project in it) {
+                    item {
+                        ProjectCard(
+                            project,
+                            onProjectSelected,
+                            onEditChange,
+                            onDeleteChange,
+                            snackBarCoroutineScope,
+                            scaffoldState
+                        )
+                        Spacer(modifier = Modifier.padding(top = 30.dp))
+                    }
                 }
             }
         }

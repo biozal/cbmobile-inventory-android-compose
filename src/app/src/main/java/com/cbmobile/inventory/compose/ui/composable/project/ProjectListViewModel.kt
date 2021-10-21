@@ -32,10 +32,6 @@ class ProjectListViewModel (private val projectRepository: ProjectRepository)
         var didDelete = false
         viewModelScope.launch(Dispatchers.IO){
             didDelete = projectRepository.deleteProject(projectId)
-            if (didDelete){
-                val newProjects = _projects.value?.filter { p -> p.projectId != projectId }
-                _projects.postValue(newProjects)
-            }
         }
         didDelete
     }

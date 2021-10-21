@@ -21,7 +21,12 @@ class AuditViewModel(
     init {
         viewModelScope.launch{
             if (auditJson == null || auditJson == "create"){
-                audit.value = auditRepository.getAudit(UUID.randomUUID().toString())
+                projectId?.let {
+                    audit.value = auditRepository.getAudit(
+                        projectId = it,
+                        auditId = UUID.randomUUID().toString()
+                    )
+                }
             } else {
                 audit.value = Gson().fromJson(auditJson, Audit::class.java)
             }
@@ -68,7 +73,7 @@ class AuditViewModel(
                     audit.value.partNumber = partNumber.trim()
                 }
                 //add in the project of the audit
-                audit.value.projectId = it
+                audit.value.projectId = projectId
                 auditRepository.saveAudit(audit.value)
             }
         }
