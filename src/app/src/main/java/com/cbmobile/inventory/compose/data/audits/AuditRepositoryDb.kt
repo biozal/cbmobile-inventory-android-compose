@@ -4,7 +4,6 @@ import android.content.Context
 import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.models.Audit
 import com.cbmobile.inventory.compose.models.AuditWrapper
-import com.cbmobile.inventory.compose.models.Project
 import com.couchbase.lite.MutableDocument
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers

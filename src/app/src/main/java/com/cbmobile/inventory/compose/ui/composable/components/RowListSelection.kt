@@ -68,7 +68,7 @@ fun RowListSelection(selection: String,
                     expanded = expanded,
                     onDismissRequest = { expanded = false })
                 {
-                    items?.forEach {
+                    items.forEach {
                         DropdownMenuItem(onClick = {
                             onSelectionChanged(it)
                             expanded = false

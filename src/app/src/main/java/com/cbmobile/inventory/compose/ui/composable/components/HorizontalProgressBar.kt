@@ -1,4 +1,4 @@
-package com.cbmobile.inventory.compose.ui.composable
+package com.cbmobile.inventory.compose.ui.composable.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas

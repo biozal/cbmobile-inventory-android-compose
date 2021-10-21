@@ -1,7 +1,6 @@
 package com.cbmobile.inventory.compose.data.audits
 
 import com.cbmobile.inventory.compose.models.Audit
-import com.cbmobile.inventory.compose.models.Project
 
 interface AuditRepository {
 

@@ -86,7 +86,7 @@ fun ReplicationConfigOptions(
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
-        item () {
+        item  {
             Row(modifier = Modifier
                 .padding(top = 10.dp, start = 16.dp, end = 16.dp, bottom = 4.dp)
                 .fillMaxWidth()
@@ -94,7 +94,7 @@ fun ReplicationConfigOptions(
                 Text("Configuration", style = MaterialTheme.typography.subtitle1)
             }
         }
-        item() {
+        item{
             Row(modifier = Modifier
                 .padding(rowPadding)
                 .fillMaxWidth()
@@ -107,7 +107,7 @@ fun ReplicationConfigOptions(
                     label = { Text("Sync Gateway Server URL") })
             }
         }
-        item(){
+        item{
             Row(modifier = Modifier
                 .padding(rowPadding)
                 .fillMaxWidth())
@@ -123,28 +123,28 @@ fun ReplicationConfigOptions(
                 )
             }
         }
-        item() {
+        item {
             Row(modifier = Modifier
                 .padding(rowPadding)
                 .fillMaxWidth()) {
                 Text("Replicator Type", style = MaterialTheme.typography.caption)
             }
         }
-        item(){
+        item{
             RowListSelection(
                 selection = replicatorTypeSelected,
                 items = replicatorTypes,
                 onSelectionChanged = { onReplicatorTypeChanged(it) },
                 imageVector = Icons.Default.Sync)
         }
-        item() {
+        item {
             LabelSwitchRow(
                 text = "Continuous",
                 isSwitched = isContinuous,
                 onCheckChanged = { onContinuousChanged(it) }
             )
         }
-        item() {
+        item {
             LabelSwitchRow(
                 text = "Accept Only Self-Signed Certs",
                 isSwitched = useSelfSignedCert,
@@ -154,17 +154,17 @@ fun ReplicationConfigOptions(
         item {
             DividerRow()
         }
-        item() {
+        item {
             Row(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                 Text("Authentication", style = MaterialTheme.typography.h6)
             }
         }
-        item() {
+        item {
             Row(modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)) {
                 Text("Username: $username")
             }
         }
-        item () {
+        item {
             Row(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)) {
                 Text("Password: $password")
             }
@@ -172,7 +172,7 @@ fun ReplicationConfigOptions(
         item {
             DividerRow()
         }
-        item() {
+        item {
             RowButton ( onClick = {
                 //save and head back
                 onSave()

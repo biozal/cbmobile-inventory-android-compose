@@ -8,7 +8,6 @@ import com.cbmobile.inventory.compose.data.projects.ProjectRepository
 import com.cbmobile.inventory.compose.models.Project
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
-import java.util.*
 
 class AuditListViewModel(
     private val projectJson: String?,

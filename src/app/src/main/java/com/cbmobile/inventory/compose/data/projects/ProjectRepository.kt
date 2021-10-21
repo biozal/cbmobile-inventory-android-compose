@@ -1,12 +1,11 @@
 package com.cbmobile.inventory.compose.data.projects
 
-import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.Project
-import com.couchbase.lite.DocumentChange
-import com.couchbase.lite.QueryChange
 import kotlinx.coroutines.flow.Flow
 
 interface ProjectRepository {
+
+    val projectDatabaseName: String
 
     suspend fun saveProject(project: Project)
 
@@ -23,4 +22,5 @@ interface ProjectRepository {
     suspend fun deleteDatabase()
 
     suspend fun loadSampleData()
+
 }

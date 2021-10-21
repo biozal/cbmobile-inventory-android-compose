@@ -67,7 +67,7 @@ fun LocationListSelection(
                 expanded = expanded,
                 onDismissRequest = { expanded = false })
             {
-                locations?.forEach { location ->
+                locations.forEach { location ->
                     DropdownMenuItem(onClick = {
                         onLocationChanged(location)
                         expanded = false

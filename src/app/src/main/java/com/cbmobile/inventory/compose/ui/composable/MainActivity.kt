@@ -4,20 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.*
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cbmobile.inventory.compose.InventoryApplication
 import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.ui.composable.components.Drawer
 import com.cbmobile.inventory.compose.ui.composable.ui.theme.InventoryTheme
 import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    @InternalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,15 +23,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ProvideWindowInsets {
-                val systemUiController = rememberSystemUiController()
-
                 val scope = rememberCoroutineScope()
                 val navController = rememberNavController()
                 val scaffoldState = rememberScaffoldState()
                 val inventoryDatabase = InventoryDatabase.getInstance(this.applicationContext)
                 val currentUser = inventoryDatabase.loggedInUser!!
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route ?: MainDestinations.HOME_ROUTE
+
+                //before we route make sure database is setup
+                appContainer.projectListViewModel.setup()
 
                 /*
                 SideEffect {
@@ -65,6 +62,11 @@ class MainActivity : ComponentActivity() {
                                         scope.launch {
                                             drawerState.close()
                                         }
+                                        if (route == MainDestinations.LOGOUT_ROUTE) {
+                                            inventoryDatabase.closeDatabases()
+                                            inventoryDatabase.loggedInUser = null
+                                            appContainer.projectListViewModel.deleteProjects()
+                                        }
                                         navController.navigate(route) {
                                             popUpTo(navController.graph.startDestinationId)
                                             launchSingleTop = true
@@ -75,12 +77,10 @@ class MainActivity : ComponentActivity() {
                         ) {
                             InventoryNavGraph(
                                 openDrawer =  { openDrawer() },
-                                inventoryDatabase = inventoryDatabase,
                                 currentUser = currentUser,
                                 appContainer = appContainer,
                                 navController = navController,
                                 scaffoldState = scaffoldState,
-                                lifecycleScope = lifecycleScope,
                                 scope = scope
                             )
                         }

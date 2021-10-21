@@ -1,8 +1,6 @@
 package com.cbmobile.inventory.compose.data.projects
 
-import com.cbmobile.inventory.compose.models.Location
 import com.cbmobile.inventory.compose.models.Project
-import com.couchbase.lite.DocumentChange
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
@@ -12,6 +10,9 @@ class ProjectRepositoryMock : ProjectRepository {
     override suspend fun completeProject(projectId: String) {
         TODO("Not yet implemented")
     }
+
+    override val projectDatabaseName: String
+        get() = TODO("Not yet implemented")
 
     override suspend fun saveProject(project: Project) {
         TODO("Not yet implemented")

@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LifecycleCoroutineScope
 
 import com.cbmobile.inventory.compose.data.location.LocationRepository
 import com.cbmobile.inventory.compose.data.projects.*
@@ -24,14 +23,12 @@ import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 
 @Composable
 fun ProjectEditorScreen(
-    openDrawer: () -> Unit,
     currentUser: UserProfile,
     projectJson: String?,
     projectRepository: ProjectRepository,
     locationRepository: LocationRepository,
     navigateUp: () -> Unit,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
-    lifecycleScope: LifecycleCoroutineScope) {
+    scaffoldState: ScaffoldState = rememberScaffoldState()) {
 
     val viewModel = ProjectViewModel(
                         currentUser = currentUser,
@@ -131,7 +128,7 @@ fun ProjectEditor(
 @Preview(showBackground = true)
 @Composable
 private fun ProjectEditorPreview() {
-    val project: Project = Project()
+    val project = Project()
     val onNameChange: (String) -> Unit = {}
     val dueDate = "Due Date"
     val locationSelect = "Select Location"

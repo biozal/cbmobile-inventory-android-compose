@@ -2,6 +2,7 @@ package com.cbmobile.inventory.compose.ui.composable.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -21,18 +22,21 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.cbmobile.inventory.compose.AppContainer
 import com.cbmobile.inventory.compose.InventoryApplication
 import com.cbmobile.inventory.compose.R
+import com.cbmobile.inventory.compose.data.InventoryDatabase
 import com.cbmobile.inventory.compose.ui.composable.MainActivity
 
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import dagger.hilt.android.AndroidEntryPoint
 
 class LoginActivity : ComponentActivity() {
+    var appContainer: AppContainer? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val appContainer = (application as InventoryApplication).container
+        appContainer = (application as InventoryApplication).container
         setContent {
             InventoryTheme {
                 // A surface container using the 'background' color from the theme
@@ -40,11 +44,43 @@ class LoginActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    val viewModel = LoginViewModel(appContainer.authenticationService)
-                    SetupLogin(viewModel = viewModel)
+                    appContainer?.let {
+                        val viewModel = LoginViewModel(it.authenticationService)
+                        SetupLogin(viewModel = viewModel)
+                    }
                 }
             }
         }
+    }
+
+    //turn off replication when the app is in the background
+    override fun onPause() {
+        super.onPause()
+        appContainer?.let {
+            if (it.replicationService.isReplicationStarted) {
+                it.replicationService.stopReplication()
+
+                //set it back to true so we can start again when the app resumes
+                it.replicationService.isReplicationStarted = true
+                Log.e(Log.VERBOSE.toString(), "Stopped replication - app going to background")
+            }
+        }
+    }
+
+    //validate and possibly turn replication back on
+    override fun onResume() {
+        super.onResume()
+        appContainer?.let {
+            if (it.replicationService.isReplicationStarted) {
+                it.replicationService.startReplication()
+                Log.e(Log.VERBOSE.toString(), "Started replication, app coming to foreground")
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        InventoryDatabase.getInstance(applicationContext).dispose()
     }
 }
 
@@ -53,13 +89,20 @@ fun SetupLogin(viewModel: LoginViewModel){
     val username = viewModel.username.observeAsState("")
     val password =  viewModel.password.observeAsState("")
     val isError = viewModel.isError.observeAsState(false)
+    val context = LocalContext.current
+
+    val onLoginCheck: () -> Unit = {
+        if (viewModel.login()){
+            context.startActivity(Intent(context, MainActivity::class.java))
+        }
+    }
 
     Login(username = username.value,
         password = password.value,
         isLoginError = isError.value,
         onUsernameChanged = viewModel.onUsernameChanged,
         onPasswordChanged = viewModel.onPasswordChanged,
-        login = viewModel::login)
+        login = onLoginCheck)
 }
 
 @Composable
@@ -69,9 +112,9 @@ fun Login(
     isLoginError: Boolean,
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
-    login: () -> Boolean) {
-    val context = LocalContext.current
+    login: () -> Unit) {
 
+    val context = LocalContext.current
     Column(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight()
@@ -98,17 +141,12 @@ fun Login(
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
-                if (login()){
-                    context.startActivity(Intent(context, MainActivity::class.java))
-                }
+                login()
             })
         )
         Button(modifier = Modifier.padding(top = 32.dp),
             onClick = {
-                if (login()){
-                    context.startActivity(Intent(context, MainActivity::class.java))
-                }
-
+                login()
             })
         {
             Text("Login", style = MaterialTheme.typography.h5)
@@ -127,9 +165,9 @@ fun Login(
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    val username : String = ""
-    val password: String = ""
-    val isError: Boolean = false
+    val username = ""
+    val password = ""
+    val isError = false
 
     InventoryTheme {
         Login(username = username,
@@ -137,6 +175,6 @@ fun DefaultPreview() {
             isLoginError = isError,
             onUsernameChanged = { },
             onPasswordChanged = { },
-            login = { false } )
+            login = { } )
     }
 }

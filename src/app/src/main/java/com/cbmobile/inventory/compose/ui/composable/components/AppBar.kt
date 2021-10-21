@@ -1,6 +1,5 @@
 package com.cbmobile.inventory.compose.ui.composable.components
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton

@@ -96,6 +96,9 @@
               
           /* Authorization  - Access Control */
          requireRole(team);
+         access("role:team1", "channel.team1")
+         access("role:team2", "channel.team2")
+         access("role:team3", "channel.team3")
          }
       }
   // get type property

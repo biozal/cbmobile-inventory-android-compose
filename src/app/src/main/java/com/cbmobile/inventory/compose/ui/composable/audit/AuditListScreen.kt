@@ -6,10 +6,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.LifecycleCoroutineScope
 import com.cbmobile.inventory.compose.data.audits.AuditRepository
 import com.cbmobile.inventory.compose.data.projects.ProjectRepository
-import com.cbmobile.inventory.compose.ui.composable.NoItemsFound
+import com.cbmobile.inventory.compose.ui.composable.components.NoItemsFound
 import com.cbmobile.inventory.compose.ui.composable.components.AddButton
 import com.cbmobile.inventory.compose.ui.composable.components.InventoryAppBar
 import com.cbmobile.inventory.compose.ui.theme.InventoryTheme
@@ -21,8 +20,7 @@ fun AuditListScreen(
     auditRepository: AuditRepository,
     projectRepository: ProjectRepository,
     navigateUp: () -> Unit,
-    navigateToAuditEditor: (String) -> Unit,
-    lifecycleScope: LifecycleCoroutineScope)
+    navigateToAuditEditor: (String, String) -> Unit)
 {
     val viewModel = AuditListViewModel(
         project,
@@ -35,7 +33,12 @@ fun AuditListScreen(
                             title = "${viewModel.project.value.name} Audits",
                             navigationIcon = Icons.Filled.ArrowBack,
                             navigationOnClick = { navigateUp() })},
-            floatingActionButton = { AddButton(navigateToAuditEditor) })
+            floatingActionButton = {
+                AddButton(
+                    onClick = {
+                        navigateToAuditEditor(viewModel.project.value.projectId, "create")
+                })
+            })
         {
             Surface(
                 color = MaterialTheme.colors.background,

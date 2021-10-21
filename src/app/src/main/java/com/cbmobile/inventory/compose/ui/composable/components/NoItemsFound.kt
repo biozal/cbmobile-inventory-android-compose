@@ -1,4 +1,4 @@
-package com.cbmobile.inventory.compose.ui.composable
+package com.cbmobile.inventory.compose.ui.composable.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme

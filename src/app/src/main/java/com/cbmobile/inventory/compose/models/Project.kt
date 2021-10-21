@@ -3,8 +3,7 @@ package com.cbmobile.inventory.compose.models
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ProjectModelDTO(override var item: Project) : ModelDTO<Project> {
-}
+class ProjectModelDTO(override var item: Project) : ModelDTO<Project>
 
 data class Project (
     var projectId: String = "",
@@ -34,7 +33,7 @@ data class Project (
         val calendar: Calendar = Calendar.getInstance()
         dueDate?.let {
 
-            calendar.timeInMillis = it.time.toLong()
+            calendar.timeInMillis = it.time
             return formatter.format(calendar.time)
         }
         return ""

@@ -11,12 +11,13 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class AuditViewModel(
+    private val projectId: String?,
     private val auditJson: String?,
     private val auditRepository: AuditRepository)
     : ViewModel()
 {
     var audit = mutableStateOf(Audit())
-
+    var count = mutableStateOf("")
     init {
         viewModelScope.launch{
             if (auditJson == null || auditJson == "create"){
@@ -33,10 +34,14 @@ class AuditViewModel(
         audit.value = a
     }
 
-    val onCountChanged: (Int) -> Unit = { newValue ->
+    val onCountChanged: (String) -> Unit = { newValue ->
         val a = audit.value.copy()
-        a.count = newValue
-        audit.value = a
+        if (newValue != "") {
+            val a = audit.value.copy()
+            a.count = newValue.toInt()
+            audit.value = a
+            count.value = newValue
+        }
     }
 
     val onNotesChanged: (String) -> Unit = { newValue ->
@@ -53,15 +58,19 @@ class AuditViewModel(
 
     val onSaveAudit: () -> Unit = {
         viewModelScope.launch {
-            //clean up data - remove spaces at the end of strings
-            audit.value.name = audit.value.name.trim()
-            audit.value.notes?.let { notes ->
-                audit.value.notes = notes.trim()
+            projectId?.let {
+                //clean up data - remove spaces at the end of strings
+                audit.value.name = audit.value.name.trim()
+                audit.value.notes?.let { notes ->
+                    audit.value.notes = notes.trim()
+                }
+                audit.value.partNumber?.let { partNumber ->
+                    audit.value.partNumber = partNumber.trim()
+                }
+                //add in the project of the audit
+                audit.value.projectId = it
+                auditRepository.saveAudit(audit.value)
             }
-            audit.value.partNumber?.let { partNumber ->
-                audit.value.partNumber = partNumber.trim()
-            }
-            auditRepository.saveAudit(audit.value)
         }
     }
 

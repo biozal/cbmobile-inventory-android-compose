@@ -11,28 +11,37 @@ import java.util.zip.ZipInputStream
 
 class InventoryDatabase private constructor(val context: Context) {
 
-    var databases: MutableMap<String, DatabaseResource> = mutableMapOf<String, DatabaseResource>()
+    var databases: MutableMap<String, DatabaseResource> = mutableMapOf()
     var projectDatabaseName = "project"
-    var locationDatabase = "locations"
+    private var locationDatabase = "locations"
     var loggedInUser: UserProfile? = null
 
     init {
         //setup couchbase lite
         CouchbaseLite.init(context)
 
-        if (BuildConfig.DEBUG) {
-            Database.log.console.domains = LogDomain.ALL_DOMAINS
-            Database.log.console.level = LogLevel.VERBOSE
-        }
+        Database.log.console.domains = LogDomain.ALL_DOMAINS
+        Database.log.console.level = LogLevel.VERBOSE
     }
 
-    fun setTeamProjectDatabaseName(team: String){
-        projectDatabaseName = "project$team"
+    fun dispose () {
+        databases.forEach{
+            it.value.replicator?.stop()
+            it.value.database.close()
+        }
+
+    }
+    fun getTeamProjectDatabaseName() : String{
+        loggedInUser?.team?.let { team ->
+            projectDatabaseName = "project$team"
+            return "project$team"
+        }
+        return ""
     }
 
     fun deleteDatabase() {
         try {
-            databases.forEach(){
+            databases.forEach {
                 if (Database.exists(it.key, context.filesDir)){
                     it.value.database.close()
                     Database.delete(it.key, context.filesDir)
@@ -44,12 +53,26 @@ class InventoryDatabase private constructor(val context: Context) {
         }
     }
 
+    fun closeDatabases() {
+        try {
+            databases.forEach{
+                it.value.replicator?.stop()
+                it.value.database.close()
+            }
+            databases.clear()
+            projectDatabaseName = "project"
+        } catch (e: java.lang.Exception){
+            android.util.Log.e(e.message, e.stackTraceToString())
+        }
+    }
+
     fun initializeDatabase() {
         try {
-            loggedInUser?.let { user ->
+            loggedInUser?.let { _ ->
+                val databaseName = getTeamProjectDatabaseName()
                 val dbConfig = DatabaseConfigurationFactory.create(context.filesDir.toString())
                 //if databases don't exist create them from embedded asset
-                if (!Database.exists(projectDatabaseName, context.filesDir)) {
+                if (!Database.exists(databaseName, context.filesDir)) {
 
                     //get location database zip file from apk, write to disk
                     val locationDbPath = File(context.filesDir.toString())
@@ -57,11 +80,11 @@ class InventoryDatabase private constructor(val context: Context) {
                     unzip("locations.zip", locationDbPath)
 
                     //copy the location database to the project database
-                    val locationDbFile = File( String.format( "%s/%s", context.filesDir, (locationDatabase + ".cblite2") ))
-                    Database.copy(locationDbFile, projectDatabaseName, dbConfig)
+                    val locationDbFile = File( String.format( "%s/%s", context.filesDir, ("${locationDatabase}.cblite2") ))
+                    Database.copy(locationDbFile, databaseName, dbConfig)
                 }
                 //get database and store pointer for later use
-                val database = Database(projectDatabaseName, dbConfig)
+                val database = Database(databaseName, dbConfig)
 
                 //create index for document type if it doesn't exist
                 if (!database.indexes.contains("typeIndex")) {
@@ -79,8 +102,8 @@ class InventoryDatabase private constructor(val context: Context) {
                             )))
                 }
                 //store pointers for later use
-                val databaseResource = DatabaseResource(database, dbConfig)
-                databases[projectDatabaseName] = databaseResource
+                val databaseResource = DatabaseResource(database)
+                databases[databaseName] = databaseResource
             }
         } catch (e: Exception) {
             android.util.Log.e(e.message, e.stackTraceToString())
@@ -118,5 +141,5 @@ class InventoryDatabase private constructor(val context: Context) {
         }
     }
 
-    companion object : Singleton<InventoryDatabase, Context>(::InventoryDatabase);
+    companion object : Singleton<InventoryDatabase, Context>(::InventoryDatabase)
 }
